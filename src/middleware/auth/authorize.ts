@@ -1,0 +1,25 @@
+import { Request, Response, NextFunction } from 'express';
+import { ApiError } from '../../utils/ApiError';
+import { IAuthRequest, UserRole } from '../../types';
+
+export const authorize = (...roles: UserRole[]) =>
+  (req: Request, _res: Response, next: NextFunction): void => {
+    const authReq = req as IAuthRequest;
+    if (!authReq.user) return next(ApiError.unauthorized());
+    if (!roles.includes(authReq.user.role)) {
+      return next(ApiError.forbidden(`Access denied. Required role: ${roles.join(' or ')}`));
+    }
+    next();
+  };
+
+export const requireEmailVerified = (
+  req: Request,
+  _res: Response,
+  next: NextFunction
+): void => {
+  const authReq = req as IAuthRequest;
+  if (!authReq.user?.isEmailVerified) {
+    return next(ApiError.forbidden('Please verify your email address first'));
+  }
+  next();
+};
