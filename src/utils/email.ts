@@ -32,9 +32,9 @@ export const sendEmail = async (options: IEmailOptions): Promise<void> => {
 };
 
 export const emailTemplates = {
-verifyEmail: (name: string, token: string, clientUrl: string) => ({
-  subject: 'Verify your Propeers account',
-  html: `
+  verifyEmail: (name: string, token: string, clientUrl: string) => ({
+    subject: 'Verify your Propeers account',
+    html: `
     <h2>Welcome to Propeers, ${name}!</h2>
     <p>Please verify your email by clicking the link below:</p>
 
@@ -48,7 +48,7 @@ verifyEmail: (name: string, token: string, clientUrl: string) => ({
     <p>This link expires in 24 hours.</p>
     <p>If you didn't create an account, please ignore this email.</p>
   `,
-}),
+  }),
   resetPassword: (name: string, token: string, clientUrl: string) => ({
     subject: 'Reset your Propeers password',
     html: `

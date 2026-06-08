@@ -8,9 +8,16 @@ export class PaymentController {
     try {
       const studentId = (req as IAuthRequest).user!._id.toString();
       const { mentorId, packageId, availabilityId } = req.body;
-      const order = await paymentService.createOrder(studentId, mentorId, packageId, availabilityId);
+      const order = await paymentService.createOrder(
+        studentId,
+        mentorId,
+        packageId,
+        availabilityId
+      );
       sendCreated(res, order, 'Payment order created');
-    } catch (e) { next(e); }
+    } catch (e) {
+      next(e);
+    }
   }
 
   async verify(req: Request, res: Response, next: NextFunction) {
@@ -19,7 +26,7 @@ export class PaymentController {
         razorpayOrderId,
         razorpayPaymentId,
         razorpaySignature,
-        meetingData,         // { roomId, provider, meetingLink, hostLink }
+        meetingData, // { roomId, provider, meetingLink, hostLink }
       } = req.body;
 
       const result = await paymentService.verifyAndConfirm(
@@ -29,7 +36,9 @@ export class PaymentController {
         meetingData
       );
       sendSuccess(res, result, 'Payment verified. Booking confirmed.');
-    } catch (e) { next(e); }
+    } catch (e) {
+      next(e);
+    }
   }
 
   /**
@@ -44,7 +53,9 @@ export class PaymentController {
         signature
       );
       res.status(200).json({ received: true });
-    } catch (e) { next(e); }
+    } catch (e) {
+      next(e);
+    }
   }
 }
 

@@ -52,7 +52,7 @@ export class PaymentDAO {
         .skip(skip)
         .limit(limit)
         .sort({ createdAt: -1 }),
-        
+
       Payment.countDocuments(),
     ]);
     return { payments, total };
@@ -60,4 +60,3 @@ export class PaymentDAO {
 }
 
 export const paymentDAO = new PaymentDAO();
- 

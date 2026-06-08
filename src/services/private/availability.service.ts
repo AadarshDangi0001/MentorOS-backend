@@ -12,11 +12,7 @@ export class AvailabilityService {
     return mentor;
   }
 
-  async create(
-    userId: string,
-    startTime: Date,
-    endTime: Date
-  ): Promise<IAvailabilitySlot> {
+  async create(userId: string, startTime: Date, endTime: Date): Promise<IAvailabilitySlot> {
     await this.assertApprovedMentor(userId);
 
     if (startTime <= new Date()) throw ApiError.badRequest('Slot must be in the future');
@@ -36,10 +32,7 @@ export class AvailabilityService {
     });
   }
 
-  async getByMentor(
-    mentorUserId: string,
-    onlyAvailable: boolean
-  ): Promise<IAvailabilitySlot[]> {
+  async getByMentor(mentorUserId: string, onlyAvailable: boolean): Promise<IAvailabilitySlot[]> {
     return availabilityDAO.findByMentor(mentorUserId, onlyAvailable);
   }
 

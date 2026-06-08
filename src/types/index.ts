@@ -101,7 +101,7 @@ export interface IMentor extends Document {
 export interface IAvailabilitySlot {
   day: number; // 0-6 (Sunday-Saturday)
   startTime: string; // "09:00"
-  endTime: string;   // "17:00"
+  endTime: string; // "17:00"
 }
 
 // ─── Auth ─────────────────────────────────────────────────────
@@ -144,4 +144,3 @@ export interface IPaginationQuery {
   order?: 'asc' | 'desc';
   search?: string;
 }
-

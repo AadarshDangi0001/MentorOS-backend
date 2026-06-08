@@ -10,7 +10,9 @@ export class ReviewController {
       const { bookingId, rating, review } = req.body;
       const r = await reviewService.submit(studentId, bookingId, rating, review);
       sendCreated(res, { review: r }, 'Review submitted');
-    } catch (e) { next(e); }
+    } catch (e) {
+      next(e);
+    }
   }
 
   async getByMentor(req: Request, res: Response, next: NextFunction) {
@@ -22,7 +24,9 @@ export class ReviewController {
         Number(limit ?? 10)
       );
       sendSuccess(res, result);
-    } catch (e) { next(e); }
+    } catch (e) {
+      next(e);
+    }
   }
 }
 

@@ -47,10 +47,7 @@ export class ExploreService {
       };
     }
 
-    if (
-      minExperience !== undefined ||
-      maxExperience !== undefined
-    ) {
+    if (minExperience !== undefined || maxExperience !== undefined) {
       const expFilter: Record<string, number> = {};
 
       if (minExperience !== undefined) {
@@ -70,13 +67,9 @@ export class ExploreService {
       };
     }
 
-    const sortDir: SortOrder =
-      order === 'asc' ? 1 : -1;
+    const sortDir: SortOrder = order === 'asc' ? 1 : -1;
 
-    const sortMap: Record<
-      string,
-      Record<string, SortOrder>
-    > = {
+    const sortMap: Record<string, Record<string, SortOrder>> = {
       rating: {
         rating: sortDir,
       },
@@ -122,10 +115,7 @@ export class ExploreService {
       user: mentorUserId,
       mentorStatus: MentorStatus.APPROVED,
     })
-      .populate(
-        'user',
-        'name email avatar bio phone'
-      )
+      .populate('user', 'name email avatar bio phone')
       .select('-documents')
       .lean();
 

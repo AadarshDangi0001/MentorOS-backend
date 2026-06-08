@@ -37,4 +37,45 @@ export const isTokenBlacklisted = async (token: string): Promise<boolean> => {
   return result === '1';
 };
 
+// ─── Distributed Locking ───────────────────────────────────────
+export const acquireLock = async (key: string, ttlMs: number): Promise<boolean> => {
+  const result = await redisClient.set(key, 'locked', {
+    PX: ttlMs,
+    NX: true,
+  });
+  return result === 'OK';
+};
+
+export const releaseLock = async (key: string): Promise<void> => {
+  await redisClient.del(key);
+};
+
+// ─── User Session Caching ──────────────────────────────────────
+export const setUserSession = async (
+  userId: string,
+  userJson: string,
+  ttl: number
+): Promise<void> => {
+  await redisClient.setEx(`user:session:${userId}`, ttl, userJson);
+};
+
+export const getUserSession = async (userId: string): Promise<string | null> => {
+  return redisClient.get(`user:session:${userId}`);
+};
+
+export const deleteUserSession = async (userId: string): Promise<void> => {
+  await redisClient.del(`user:session:${userId}`);
+};
+
+// ─── Pattern-Based Cache Invalidation ──────────────────────────
+export const deleteKeysByPattern = async (pattern: string): Promise<void> => {
+  const keys: string[] = [];
+  for await (const key of redisClient.scanIterator({ MATCH: pattern })) {
+    keys.push(key);
+  }
+  if (keys.length > 0) {
+    await redisClient.del(keys);
+  }
+};
+
 export default redisClient;

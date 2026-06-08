@@ -48,7 +48,7 @@ export class AvailabilityDAO {
       mentor: mentorId,
       $or: [
         { startTime: { $lt: endTime, $gte: startTime } },
-        { endTime:   { $gt: startTime, $lte: endTime } },
+        { endTime: { $gt: startTime, $lte: endTime } },
         { startTime: { $lte: startTime }, endTime: { $gte: endTime } },
       ],
     };

@@ -25,14 +25,17 @@ export class PublicAuthService {
 
     // [DAO] create user
     const user = await userDAO.createUser({
-      name, email, password, role,
+      name,
+      email,
+      password,
+      role,
       emailVerificationToken: hashedToken,
       emailVerificationExpires: new Date(Date.now() + 24 * 60 * 60 * 1000),
     });
 
     // [DAO] create role profile
     if (role === UserRole.STUDENT) await profileDAO.createStudentProfile(user._id);
-    if (role === UserRole.MENTOR)  await profileDAO.createMentorProfile(user._id);
+    if (role === UserRole.MENTOR) await profileDAO.createMentorProfile(user._id);
 
     // send verification email (non-blocking)
     try {
@@ -51,10 +54,7 @@ export class PublicAuthService {
   }
 
   // ─── Login ─────────────────────────────────────────────────
-  async login(
-    email: string,
-    password: string
-  ): Promise<{ user: IUser; tokens: IAuthTokens }> {
+  async login(email: string, password: string): Promise<{ user: IUser; tokens: IAuthTokens }> {
     // [DAO] fetch with sensitive fields
     const user = await userDAO.findByEmailWithSecrets(email);
     if (!user) throw ApiError.unauthorized('Invalid credentials');
@@ -65,7 +65,9 @@ export class PublicAuthService {
 
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
-      await (user as unknown as { incrementLoginAttempts(): Promise<void> }).incrementLoginAttempts();
+      await (
+        user as unknown as { incrementLoginAttempts(): Promise<void> }
+      ).incrementLoginAttempts();
       throw ApiError.unauthorized('Invalid credentials');
     }
 
@@ -111,8 +113,7 @@ export class PublicAuthService {
 
     // Rate-limit resend: block if a valid (non-expired) token still exists
     const tokenStillValid =
-      user.emailVerificationExpires &&
-      user.emailVerificationExpires > new Date();
+      user.emailVerificationExpires && user.emailVerificationExpires > new Date();
 
     if (tokenStillValid) {
       throw ApiError.tooMany(

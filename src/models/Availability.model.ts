@@ -10,8 +10,8 @@ const AvailabilitySchema = new Schema<IAvailabilitySlot>(
       index: true,
     },
     startTime: { type: Date, required: true },
-    endTime:   { type: Date, required: true },
-    isBooked:  { type: Boolean, default: false, index: true },
+    endTime: { type: Date, required: true },
+    isBooked: { type: Boolean, default: false, index: true },
   },
   { timestamps: true }
 );

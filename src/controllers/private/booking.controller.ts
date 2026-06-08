@@ -9,7 +9,9 @@ export class BookingController {
       const userId = (req as IAuthRequest).user!._id.toString();
       const booking = await bookingService.getById(req.params.id, userId);
       sendSuccess(res, { booking });
-    } catch (e) { next(e); }
+    } catch (e) {
+      next(e);
+    }
   }
 
   async getMyBookings(req: Request, res: Response, next: NextFunction) {
@@ -21,7 +23,9 @@ export class BookingController {
         status as string | undefined as any
       );
       sendSuccess(res, { bookings });
-    } catch (e) { next(e); }
+    } catch (e) {
+      next(e);
+    }
   }
 
   async getMentorBookings(req: Request, res: Response, next: NextFunction) {
@@ -33,7 +37,9 @@ export class BookingController {
         status as string | undefined as any
       );
       sendSuccess(res, { bookings });
-    } catch (e) { next(e); }
+    } catch (e) {
+      next(e);
+    }
   }
 
   async requestReschedule(req: Request, res: Response, next: NextFunction) {
@@ -47,7 +53,9 @@ export class BookingController {
         reason
       );
       sendSuccess(res, { booking }, 'Reschedule request sent to student');
-    } catch (e) { next(e); }
+    } catch (e) {
+      next(e);
+    }
   }
 
   async acceptReschedule(req: Request, res: Response, next: NextFunction) {
@@ -55,7 +63,9 @@ export class BookingController {
       const studentId = (req as IAuthRequest).user!._id.toString();
       const booking = await bookingService.acceptReschedule(req.params.bookingId, studentId);
       sendSuccess(res, { booking }, 'Reschedule accepted');
-    } catch (e) { next(e); }
+    } catch (e) {
+      next(e);
+    }
   }
 
   async rejectReschedule(req: Request, res: Response, next: NextFunction) {
@@ -63,7 +73,9 @@ export class BookingController {
       const studentId = (req as IAuthRequest).user!._id.toString();
       const booking = await bookingService.rejectReschedule(req.params.bookingId, studentId);
       sendSuccess(res, { booking }, 'Reschedule rejected');
-    } catch (e) { next(e); }
+    } catch (e) {
+      next(e);
+    }
   }
 }
 

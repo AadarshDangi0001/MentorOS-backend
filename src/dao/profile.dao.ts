@@ -8,7 +8,6 @@ import { IStudent, IMentor } from '../types';
  * Kept together since both are created at registration time.
  */
 export class ProfileDAO {
-
   async createStudentProfile(userId: Types.ObjectId): Promise<IStudent> {
     return Student.create({ user: userId });
   }

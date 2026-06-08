@@ -1,6 +1,7 @@
 import { Types } from 'mongoose';
 import { User } from '../models/User.model';
 import { IUser, UserStatus } from '../types';
+import { deleteUserSession } from '../config/redis';
 
 /**
  * UserDAO — all raw MongoDB operations for the User collection.
@@ -8,7 +9,6 @@ import { IUser, UserStatus } from '../types';
  * Services consume this and handle logic on top.
  */
 export class UserDAO {
-
   // ─── Find ──────────────────────────────────────────────────
 
   async findByEmail(email: string): Promise<IUser | null> {
@@ -16,8 +16,7 @@ export class UserDAO {
   }
 
   async findByEmailWithSecrets(email: string): Promise<IUser | null> {
-    return User.findOne({ email })
-      .select('+password +loginAttempts +lockUntil +refreshTokens');
+    return User.findOne({ email }).select('+password +loginAttempts +lockUntil +refreshTokens');
   }
 
   async findByGoogleId(googleId: string): Promise<IUser | null> {
@@ -45,8 +44,9 @@ export class UserDAO {
 
   // Finds unverified user by email — ignores token expiry (for resend)
   async findUnverifiedByEmail(email: string): Promise<IUser | null> {
-    return User.findOne({ email, isEmailVerified: false })
-      .select('+emailVerificationToken +emailVerificationExpires');
+    return User.findOne({ email, isEmailVerified: false }).select(
+      '+emailVerificationToken +emailVerificationExpires'
+    );
   }
 
   async setVerificationToken(
@@ -117,7 +117,9 @@ export class UserDAO {
     user.status = UserStatus.ACTIVE;
     user.emailVerificationToken = undefined;
     user.emailVerificationExpires = undefined;
-    return user.save();
+    const saved = await user.save();
+    await deleteUserSession(user._id.toString());
+    return saved;
   }
 
   async savePasswordAndClearSessions(user: IUser, newPassword: string): Promise<IUser> {
@@ -125,13 +127,17 @@ export class UserDAO {
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
     user.refreshTokens = [];
-    return user.save();
+    const saved = await user.save();
+    await deleteUserSession(user._id.toString());
+    return saved;
   }
 
   async changePasswordAndClearSessions(user: IUser, newPassword: string): Promise<IUser> {
     user.password = newPassword;
     user.refreshTokens = [];
-    return user.save();
+    const saved = await user.save();
+    await deleteUserSession(user._id.toString());
+    return saved;
   }
 
   // ─── Refresh Token Management ──────────────────────────────
@@ -145,12 +151,14 @@ export class UserDAO {
         },
       },
     });
+    await deleteUserSession(userId);
   }
 
   async pullRefreshToken(userId: string, token: string): Promise<void> {
     await User.findByIdAndUpdate(userId, {
       $pull: { refreshTokens: token },
     });
+    await deleteUserSession(userId);
   }
 
   async rotateRefreshToken(userId: string, oldToken: string, newToken: string): Promise<void> {
@@ -158,6 +166,7 @@ export class UserDAO {
       $pull: { refreshTokens: oldToken },
       $push: { refreshTokens: newToken },
     });
+    await deleteUserSession(userId);
   }
 }
 

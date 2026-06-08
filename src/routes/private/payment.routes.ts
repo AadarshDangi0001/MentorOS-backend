@@ -9,6 +9,6 @@ const router = Router();
 // Student-only
 router.use(authenticate, authorize(UserRole.STUDENT));
 router.post('/create-order', paymentController.createOrder.bind(paymentController));
-router.post('/verify',       paymentController.verify.bind(paymentController));
+router.post('/verify', paymentController.verify.bind(paymentController));
 
 export default router;

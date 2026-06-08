@@ -55,9 +55,9 @@ passport.use(
           email,
           googleId,
           avatar,
-          role: UserRole.STUDENT,          // default role; user can change later
+          role: UserRole.STUDENT, // default role; user can change later
           authProvider: AuthProvider.GOOGLE,
-          isEmailVerified: true,            // Google verifies email for us
+          isEmailVerified: true, // Google verifies email for us
           status: UserStatus.ACTIVE,
         });
 

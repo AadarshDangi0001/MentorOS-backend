@@ -10,6 +10,11 @@ const router = Router();
 router.get('/:mentorId', reviewController.getByMentor.bind(reviewController));
 
 // Private: submit review
-router.post('/', authenticate, authorize(UserRole.STUDENT), reviewController.submit.bind(reviewController));
+router.post(
+  '/',
+  authenticate,
+  authorize(UserRole.STUDENT),
+  reviewController.submit.bind(reviewController)
+);
 
 export default router;

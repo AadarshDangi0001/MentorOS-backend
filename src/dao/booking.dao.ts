@@ -5,7 +5,7 @@ import { BookingStatus, IBooking } from '../types/marketplace.types';
 export class BookingDAO {
   async create(data: {
     student: Types.ObjectId;
-    mentor:  Types.ObjectId;
+    mentor: Types.ObjectId;
     package: Types.ObjectId;
     availability: Types.ObjectId;
     scheduledAt: Date;
@@ -14,15 +14,15 @@ export class BookingDAO {
     return Booking.create(data);
   }
 
-async findById(id: string): Promise<IBooking | null> {
-  return Booking.findById(id)
-    .populate('student', 'name email avatar')
-    .populate('mentor',  'name email avatar')
-    .populate('package', 'title duration price')
-    .populate('availability', 'startTime endTime')
-    .populate('meeting', 'meetingLink hostLink status');
+  async findById(id: string): Promise<IBooking | null> {
+    return Booking.findById(id)
+      .populate('student', 'name email avatar')
+      .populate('mentor', 'name email avatar')
+      .populate('package', 'title duration price')
+      .populate('availability', 'startTime endTime')
+      .populate('meeting', 'meetingLink hostLink status');
     // no .lean()
-}
+  }
 
   async findByStudent(
     studentId: string,
@@ -34,8 +34,7 @@ async findById(id: string): Promise<IBooking | null> {
       .populate('mentor', 'name email avatar')
       .populate('package', 'title duration price')
       .populate('meeting', 'meetingLink status')
-      .sort({ scheduledAt: -1 })
-    
+      .sort({ scheduledAt: -1 });
   }
 
   async findByMentor(
@@ -48,8 +47,7 @@ async findById(id: string): Promise<IBooking | null> {
       .populate('student', 'name email avatar')
       .populate('package', 'title duration price')
       .populate('meeting', 'meetingLink hostLink status')
-      .sort({ scheduledAt: -1 })
-     
+      .sort({ scheduledAt: -1 });
   }
 
   async updateStatus(id: string, status: BookingStatus): Promise<IBooking | null> {
@@ -131,7 +129,7 @@ async findById(id: string): Promise<IBooking | null> {
         .skip(skip)
         .limit(limit)
         .sort({ createdAt: -1 }),
-    
+
       Booking.countDocuments(),
     ]);
     return { bookings, total };

@@ -8,8 +8,13 @@ const router = Router();
 
 router.use(authenticate);
 
-router.get('/me',              authController.getMe.bind(authController));
-router.post('/logout',         authController.logout.bind(authController));
-router.patch('/change-password', changePasswordValidator, validate, authController.changePassword.bind(authController));
+router.get('/me', authController.getMe.bind(authController));
+router.post('/logout', authController.logout.bind(authController));
+router.patch(
+  '/change-password',
+  changePasswordValidator,
+  validate,
+  authController.changePassword.bind(authController)
+);
 
 export default router;

@@ -9,10 +9,10 @@ export class BookingService {
     const booking = await bookingDAO.findById(bookingId);
     if (!booking) throw ApiError.notFound('Booking not found');
 
-    const studentId = (booking.student as { _id: Types.ObjectId })._id?.toString()
-      ?? booking.student.toString();
-    const mentorId  = (booking.mentor  as { _id: Types.ObjectId })._id?.toString()
-      ?? booking.mentor.toString();
+    const studentId =
+      (booking.student as { _id: Types.ObjectId })._id?.toString() ?? booking.student.toString();
+    const mentorId =
+      (booking.mentor as { _id: Types.ObjectId })._id?.toString() ?? booking.mentor.toString();
 
     if (studentId !== requesterId && mentorId !== requesterId) {
       throw ApiError.forbidden('Access denied');
@@ -38,8 +38,8 @@ export class BookingService {
     const booking = await bookingDAO.findById(bookingId);
     if (!booking) throw ApiError.notFound('Booking not found');
 
-    const bMentorId = (booking.mentor as { _id: Types.ObjectId })._id?.toString()
-      ?? booking.mentor.toString();
+    const bMentorId =
+      (booking.mentor as { _id: Types.ObjectId })._id?.toString() ?? booking.mentor.toString();
     if (bMentorId !== mentorId) throw ApiError.forbidden('Not your booking');
 
     if (!['confirmed', 'rescheduled'].includes(booking.status)) {
@@ -51,7 +51,8 @@ export class BookingService {
     if (!newSlot) throw ApiError.notFound('New slot not found');
     if (newSlot.mentor.toString() !== mentorId) throw ApiError.forbidden('Slot not yours');
     if (newSlot.isBooked) throw ApiError.conflict('New slot is already booked');
-    if (newSlot.startTime <= new Date()) throw ApiError.badRequest('New slot must be in the future');
+    if (newSlot.startTime <= new Date())
+      throw ApiError.badRequest('New slot must be in the future');
 
     return bookingDAO.requestReschedule(
       bookingId,
@@ -66,8 +67,8 @@ export class BookingService {
     const booking = await bookingDAO.findById(bookingId);
     if (!booking) throw ApiError.notFound('Booking not found');
 
-    const bStudentId = (booking.student as { _id: Types.ObjectId })._id?.toString()
-      ?? booking.student.toString();
+    const bStudentId =
+      (booking.student as { _id: Types.ObjectId })._id?.toString() ?? booking.student.toString();
     if (bStudentId !== studentId) throw ApiError.forbidden('Not your booking');
 
     if (booking.status !== 'reschedule_requested') {
@@ -81,15 +82,9 @@ export class BookingService {
     if (!locked) throw ApiError.conflict('New slot is no longer available');
 
     // Free original slot
-    await availabilityDAO.markFree(
-      (booking.availability as Types.ObjectId).toString()
-    );
+    await availabilityDAO.markFree((booking.availability as Types.ObjectId).toString());
 
-    return bookingDAO.acceptReschedule(
-      bookingId,
-      new Types.ObjectId(newAvailId),
-      locked.startTime
-    );
+    return bookingDAO.acceptReschedule(bookingId, new Types.ObjectId(newAvailId), locked.startTime);
   }
 
   /** Student rejects reschedule */
@@ -97,8 +92,8 @@ export class BookingService {
     const booking = await bookingDAO.findById(bookingId);
     if (!booking) throw ApiError.notFound('Booking not found');
 
-    const bStudentId = (booking.student as { _id: Types.ObjectId })._id?.toString()
-      ?? booking.student.toString();
+    const bStudentId =
+      (booking.student as { _id: Types.ObjectId })._id?.toString() ?? booking.student.toString();
     if (bStudentId !== studentId) throw ApiError.forbidden('Not your booking');
 
     if (booking.status !== 'reschedule_requested') {

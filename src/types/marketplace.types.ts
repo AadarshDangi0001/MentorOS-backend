@@ -6,7 +6,7 @@ export interface IPackage extends Document {
   mentor: Types.ObjectId;
   title: string;
   duration: number; // minutes
-  price: number;    // INR paise (multiply by 100 for Razorpay)
+  price: number; // INR paise (multiply by 100 for Razorpay)
   description?: string;
   isActive: boolean;
   createdAt: Date;
@@ -58,7 +58,7 @@ export interface IPayment extends Document {
   _id: Types.ObjectId;
   booking: Types.ObjectId;
   student: Types.ObjectId;
-  amount: number;       // in paise
+  amount: number; // in paise
   currency: string;
   gateway: 'razorpay';
   gatewayOrderId: string;

@@ -7,12 +7,15 @@ This document lists all available endpoints with URL, method, headers, query par
 ## 1. Authentication APIs
 
 ### Register User (Public)
+
 Creates a new `student` or `mentor` account.
+
 - **Method**: `POST`
 - **URL**: `http://localhost:3000/api/v1/public/auth/register`
-- **Headers**: 
+- **Headers**:
   - `Content-Type: application/json`
 - **Request Body**:
+
 ```json
 {
   "name": "Jane Doe",
@@ -21,17 +24,21 @@ Creates a new `student` or `mentor` account.
   "role": "student"
 }
 ```
-*(Use role `"mentor"` to register as a mentor)*
+
+_(Use role `"mentor"` to register as a mentor)_
 
 ---
 
 ### Login User (Public)
+
 Logs in a user and returns an `accessToken` along with a HTTP-only cookie for the `refreshToken`.
+
 - **Method**: `POST`
 - **URL**: `http://localhost:3000/api/v1/public/auth/login`
 - **Headers**:
   - `Content-Type: application/json`
 - **Request Body**:
+
 ```json
 {
   "email": "jane.doe@example.com",
@@ -42,23 +49,29 @@ Logs in a user and returns an `accessToken` along with a HTTP-only cookie for th
 ---
 
 ### Refresh Token (Public)
+
 Obtains a new Access Token using the Refresh Token.
+
 - **Method**: `POST`
 - **URL**: `http://localhost:3000/api/v1/public/auth/refresh`
 - **Headers**:
   - `Content-Type: application/json`
 - **Request Body**:
+
 ```json
 {
   "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 }
 ```
-*(If cookies are used, the refresh token cookie is automatically read by the backend)*
+
+_(If cookies are used, the refresh token cookie is automatically read by the backend)_
 
 ---
 
 ### Verify Email (Public)
+
 Verifies the user's email address.
+
 - **Method**: `GET`
 - **URL**: `http://localhost:3000/api/v1/public/auth/verify-email/:token`
 - **URL Parameters**:
@@ -67,12 +80,15 @@ Verifies the user's email address.
 ---
 
 ### Resend Verification Email (Public)
+
 Triggers a fresh verification email link.
+
 - **Method**: `POST`
 - **URL**: `http://localhost:3000/api/v1/public/auth/resend-verification`
 - **Headers**:
   - `Content-Type: application/json`
 - **Request Body**:
+
 ```json
 {
   "email": "jane.doe@example.com"
@@ -82,12 +98,15 @@ Triggers a fresh verification email link.
 ---
 
 ### Forgot Password (Public)
+
 Requests a password reset link.
+
 - **Method**: `POST`
 - **URL**: `http://localhost:3000/api/v1/public/auth/forgot-password`
 - **Headers**:
   - `Content-Type: application/json`
 - **Request Body**:
+
 ```json
 {
   "email": "jane.doe@example.com"
@@ -97,7 +116,9 @@ Requests a password reset link.
 ---
 
 ### Reset Password (Public)
+
 Resets the password using the token sent via email.
+
 - **Method**: `POST`
 - **URL**: `http://localhost:3000/api/v1/public/auth/reset-password/:token`
 - **URL Parameters**:
@@ -105,6 +126,7 @@ Resets the password using the token sent via email.
 - **Headers**:
   - `Content-Type: application/json`
 - **Request Body**:
+
 ```json
 {
   "password": "NewSecurePassword123!"
@@ -114,7 +136,9 @@ Resets the password using the token sent via email.
 ---
 
 ### Get Authenticated User Profile (Private)
+
 Fetches profile details of the currently logged-in user.
+
 - **Method**: `GET`
 - **URL**: `http://localhost:3000/api/v1/private/auth/me`
 - **Headers**:
@@ -123,13 +147,16 @@ Fetches profile details of the currently logged-in user.
 ---
 
 ### Logout (Private)
+
 Blacklists the access token and deletes the refresh token session from the database.
+
 - **Method**: `POST`
 - **URL**: `http://localhost:3000/api/v1/private/auth/logout`
 - **Headers**:
   - `Authorization: Bearer <access_token>`
   - `Content-Type: application/json`
 - **Request Body**:
+
 ```json
 {
   "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
@@ -139,13 +166,16 @@ Blacklists the access token and deletes the refresh token session from the datab
 ---
 
 ### Change Password (Private)
+
 Updates the authenticated user's password.
+
 - **Method**: `PATCH`
 - **URL**: `http://localhost:3000/api/v1/private/auth/change-password`
 - **Headers**:
   - `Authorization: Bearer <access_token>`
   - `Content-Type: application/json`
 - **Request Body**:
+
 ```json
 {
   "currentPassword": "Password123!",
@@ -156,7 +186,9 @@ Updates the authenticated user's password.
 ---
 
 ### Google OAuth Login Initiator (Public)
+
 Redirects the client to Google Consent Page.
+
 - **Method**: `GET`
 - **URL**: `http://localhost:3000/api/v1/public/auth/google`
 
@@ -165,7 +197,9 @@ Redirects the client to Google Consent Page.
 ## 2. Mentor Exploration (Explore)
 
 ### Get Mentors (Public)
+
 Browse all approved mentors with filters and sorting options.
+
 - **Method**: `GET`
 - **URL**: `http://localhost:3000/api/v1/public/mentors`
 - **Query Parameters**:
@@ -182,14 +216,18 @@ Browse all approved mentors with filters and sorting options.
 ---
 
 ### Get Mentor Details by User ID (Public)
+
 Gets full details of an approved mentor profile.
+
 - **Method**: `GET`
 - **URL**: `http://localhost:3000/api/v1/public/mentors/:mentorId`
 
 ---
 
 ### Get Mentor Reviews (Public)
+
 Gets historical ratings/reviews for a specific mentor.
+
 - **Method**: `GET`
 - **URL**: `http://localhost:3000/api/v1/public/mentors/:mentorId/reviews`
 - **Query Parameters**:
@@ -201,13 +239,16 @@ Gets historical ratings/reviews for a specific mentor.
 ## 3. Mentor Availability & Profile Management
 
 ### Update Mentor Profile (Private - Mentor)
+
 Updates or registers the current user's mentor specific properties.
+
 - **Method**: `PUT`
 - **URL**: `http://localhost:3000/api/v1/private/mentor/profile`
 - **Headers**:
   - `Authorization: Bearer <access_token>`
   - `Content-Type: application/json`
 - **Request Body**:
+
 ```json
 {
   "company": "Google",
@@ -224,6 +265,7 @@ Updates or registers the current user's mentor specific properties.
 ---
 
 ### Get My Mentor Profile (Private - Mentor)
+
 - **Method**: `GET`
 - **URL**: `http://localhost:3000/api/v1/private/mentor/profile`
 - **Headers**:
@@ -232,7 +274,9 @@ Updates or registers the current user's mentor specific properties.
 ---
 
 ### Get Mentor Availability Slots (Public under private prefix)
+
 Gets calendar time slots for a mentor.
+
 - **Method**: `GET`
 - **URL**: `http://localhost:3000/api/v1/private/availability/:mentorId`
 - **Query Parameters**:
@@ -241,13 +285,16 @@ Gets calendar time slots for a mentor.
 ---
 
 ### Create Availability Slot (Private - Mentor)
+
 Adds a calendar availability interval.
+
 - **Method**: `POST`
 - **URL**: `http://localhost:3000/api/v1/private/availability`
 - **Headers**:
   - `Authorization: Bearer <access_token>`
   - `Content-Type: application/json`
 - **Request Body**:
+
 ```json
 {
   "startTime": "2026-06-15T09:00:00.000Z",
@@ -258,7 +305,9 @@ Adds a calendar availability interval.
 ---
 
 ### Delete Availability Slot (Private - Mentor)
+
 Removes a future availability interval.
+
 - **Method**: `DELETE`
 - **URL**: `http://localhost:3000/api/v1/private/availability/:slotId`
 - **Headers**:
@@ -269,19 +318,23 @@ Removes a future availability interval.
 ## 4. Mentor Packages
 
 ### Get Mentor Packages (Public under private prefix)
+
 Gets pricing packages for bookings.
+
 - **Method**: `GET`
 - **URL**: `http://localhost:3000/api/v1/private/packages/:mentorId`
 
 ---
 
 ### Create Package (Private - Mentor)
+
 - **Method**: `POST`
 - **URL**: `http://localhost:3000/api/v1/private/packages`
 - **Headers**:
   - `Authorization: Bearer <access_token>`
   - `Content-Type: application/json`
 - **Request Body**:
+
 ```json
 {
   "title": "System Design Prep Package",
@@ -294,12 +347,14 @@ Gets pricing packages for bookings.
 ---
 
 ### Update Package (Private - Mentor)
+
 - **Method**: `PUT`
 - **URL**: `http://localhost:3000/api/v1/private/packages/:id`
 - **Headers**:
   - `Authorization: Bearer <access_token>`
   - `Content-Type: application/json`
 - **Request Body**:
+
 ```json
 {
   "price": 2500,
@@ -310,6 +365,7 @@ Gets pricing packages for bookings.
 ---
 
 ### Delete Package (Private - Mentor)
+
 - **Method**: `DELETE`
 - **URL**: `http://localhost:3000/api/v1/private/packages/:id`
 - **Headers**:
@@ -320,7 +376,9 @@ Gets pricing packages for bookings.
 ## 5. Bookings & Rescheduling
 
 ### Get My Bookings (Private - Student)
+
 Lists student bookings.
+
 - **Method**: `GET`
 - **URL**: `http://localhost:3000/api/v1/private/bookings/my`
 - **Headers**:
@@ -331,7 +389,9 @@ Lists student bookings.
 ---
 
 ### Get Mentor Bookings (Private - Mentor)
+
 Lists mentor bookings.
+
 - **Method**: `GET`
 - **URL**: `http://localhost:3000/api/v1/private/bookings/mentor`
 - **Headers**:
@@ -340,6 +400,7 @@ Lists mentor bookings.
 ---
 
 ### Get Booking Details by ID (Private - Shared)
+
 - **Method**: `GET`
 - **URL**: `http://localhost:3000/api/v1/private/bookings/:id`
 - **Headers**:
@@ -348,12 +409,14 @@ Lists mentor bookings.
 ---
 
 ### Mentor Requests Reschedule (Private - Mentor)
+
 - **Method**: `POST`
 - **URL**: `http://localhost:3000/api/v1/private/bookings/:bookingId/reschedule`
 - **Headers**:
   - `Authorization: Bearer <access_token>`
   - `Content-Type: application/json`
 - **Request Body**:
+
 ```json
 {
   "newAvailabilityId": "65b9fc0e514f7b2c9d2f0a12",
@@ -364,6 +427,7 @@ Lists mentor bookings.
 ---
 
 ### Student Accepts Reschedule (Private - Student)
+
 - **Method**: `POST`
 - **URL**: `http://localhost:3000/api/v1/private/bookings/:bookingId/accept-reschedule`
 - **Headers**:
@@ -372,6 +436,7 @@ Lists mentor bookings.
 ---
 
 ### Student Rejects Reschedule (Private - Student)
+
 - **Method**: `POST`
 - **URL**: `http://localhost:3000/api/v1/private/bookings/:bookingId/reject-reschedule`
 - **Headers**:
@@ -382,12 +447,14 @@ Lists mentor bookings.
 ## 6. Payments & Webhooks
 
 ### Create Payment Order & Booking (Private - Student)
+
 - **Method**: `POST`
 - **URL**: `http://localhost:3000/api/v1/private/payments/create-order`
 - **Headers**:
   - `Authorization: Bearer <access_token>`
   - `Content-Type: application/json`
 - **Request Body**:
+
 ```json
 {
   "mentorId": "65b8fa0d514f7b2c9d2f0001",
@@ -399,13 +466,16 @@ Lists mentor bookings.
 ---
 
 ### Verify Payment Signature (Private - Student)
+
 Verifies signature and confirms booking with meeting details.
+
 - **Method**: `POST`
 - **URL**: `http://localhost:3000/api/v1/private/payments/verify`
 - **Headers**:
   - `Authorization: Bearer <access_token>`
   - `Content-Type: application/json`
 - **Request Body**:
+
 ```json
 {
   "razorpayOrderId": "order_Nz1Sfdj93kfldK",
@@ -423,19 +493,22 @@ Verifies signature and confirms booking with meeting details.
 ---
 
 ### Razorpay Webhook Event Handler (Public)
+
 Receives captured/failed payment callbacks directly from Razorpay.
+
 - **Method**: `POST`
 - **URL**: `http://localhost:3000/api/v1/public/payments/webhook`
 - **Headers**:
   - `x-razorpay-signature`: Signature token computed using Razorpay Webhook Secret.
 - **Request Body**:
-*(Automatic payload generated by Razorpay events system)*
+  _(Automatic payload generated by Razorpay events system)_
 
 ---
 
 ## 7. Meetings & Reviews
 
 ### Fetch Meeting Details (Private - Shared)
+
 - **Method**: `GET`
 - **URL**: `http://localhost:3000/api/v1/private/meetings/:bookingId`
 - **Headers**:
@@ -444,13 +517,16 @@ Receives captured/failed payment callbacks directly from Razorpay.
 ---
 
 ### Submit Review (Private - Student)
+
 Submit ratings/review feedback for completed mentor sessions.
+
 - **Method**: `POST`
 - **URL**: `http://localhost:3000/api/v1/private/reviews`
 - **Headers**:
   - `Authorization: Bearer <access_token>`
   - `Content-Type: application/json`
 - **Request Body**:
+
 ```json
 {
   "bookingId": "65b9fa0d514f7b2c9d2f0001",
@@ -464,7 +540,9 @@ Submit ratings/review feedback for completed mentor sessions.
 ## 8. Admin & Super Admin APIs
 
 ### Fetch System Statistics (Private - Admin/Super Admin)
+
 Returns aggregate metadata charts.
+
 - **Method**: `GET`
 - **URL**: `http://localhost:3000/api/v1/private/admin/stats`
 - **Headers**:
@@ -473,7 +551,9 @@ Returns aggregate metadata charts.
 ---
 
 ### Fetch All Users (Private - Admin/Super Admin)
+
 Lists all system user accounts.
+
 - **Method**: `GET`
 - **URL**: `http://localhost:3000/api/v1/private/admin/users`
 - **Headers**:
@@ -485,7 +565,9 @@ Lists all system user accounts.
 ---
 
 ### Block User (Private - Admin/Super Admin)
+
 Sets role to `blocked` and status to `suspended`.
+
 - **Method**: `PATCH`
 - **URL**: `http://localhost:3000/api/v1/private/admin/users/:id/block`
 - **Headers**:
@@ -494,13 +576,16 @@ Sets role to `blocked` and status to `suspended`.
 ---
 
 ### Unblock User (Private - Admin/Super Admin)
+
 Sets role to specified target (defaults to `student`) and status to `active`.
+
 - **Method**: `PATCH`
 - **URL**: `http://localhost:3000/api/v1/private/admin/users/:id/unblock`
 - **Headers**:
   - `Authorization: Bearer <access_token>`
   - `Content-Type: application/json`
 - **Request Body**:
+
 ```json
 {
   "role": "student"
@@ -510,7 +595,9 @@ Sets role to specified target (defaults to `student`) and status to `active`.
 ---
 
 ### Soft Delete User (Private - Admin/Super Admin)
+
 Sets role to `deleted` and status to `inactive`.
+
 - **Method**: `PATCH`
 - **URL**: `http://localhost:3000/api/v1/private/admin/users/:id/delete`
 - **Headers**:
@@ -519,7 +606,9 @@ Sets role to `deleted` and status to `inactive`.
 ---
 
 ### Approve Mentor Application (Private - Admin/Super Admin)
+
 Sets application status to `approved` and isVerified to `true`.
+
 - **Method**: `PATCH`
 - **URL**: `http://localhost:3000/api/v1/private/admin/mentors/:id/approve`
 - **Headers**:
@@ -528,6 +617,7 @@ Sets application status to `approved` and isVerified to `true`.
 ---
 
 ### Reject Mentor Application (Private - Admin/Super Admin)
+
 - **Method**: `PATCH`
 - **URL**: `http://localhost:3000/api/v1/private/admin/mentors/:id/reject`
 - **Headers**:
@@ -536,16 +626,20 @@ Sets application status to `approved` and isVerified to `true`.
 ---
 
 ### Change User Role (Private - Super Admin Only)
+
 Modifies a user's role to any available system role (e.g. promoting a user to admin or super_admin).
+
 - **Method**: `PATCH`
 - **URL**: `http://localhost:3000/api/v1/private/admin/users/:id/role`
 - **Headers**:
   - `Authorization: Bearer <access_token>`
   - `Content-Type: application/json`
 - **Request Body**:
+
 ```json
 {
   "role": "admin"
 }
 ```
-*(Valid roles: `"student"`, `"mentor"`, `"admin"`, `"super_admin"`, `"blocked"`, `"deleted"`)*
+
+_(Valid roles: `"student"`, `"mentor"`, `"admin"`, `"super_admin"`, `"blocked"`, `"deleted"`)_

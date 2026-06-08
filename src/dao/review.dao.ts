@@ -24,27 +24,25 @@ export class ReviewDAO {
     limit: number
   ): Promise<{ reviews: IReview[]; total: number }> {
     const skip = (page - 1) * limit;
-   const [reviews, total] = await Promise.all([
-  Review.find({ mentor: mentorId })
-    .populate('student', 'name avatar')
-    .skip(skip)
-    .limit(limit)
-    .sort({ createdAt: -1 }),
-  Review.countDocuments({ mentor: mentorId }),
-]);
+    const [reviews, total] = await Promise.all([
+      Review.find({ mentor: mentorId })
+        .populate('student', 'name avatar')
+        .skip(skip)
+        .limit(limit)
+        .sort({ createdAt: -1 }),
+      Review.countDocuments({ mentor: mentorId }),
+    ]);
     return { reviews, total };
   }
 
   /** Recalculate and return new avg rating + count */
-  async computeRatingStats(
-    mentorId: string
-  ): Promise<{ avg: number; count: number }> {
+  async computeRatingStats(mentorId: string): Promise<{ avg: number; count: number }> {
     const result = await Review.aggregate([
       { $match: { mentor: new Types.ObjectId(mentorId) } },
       {
         $group: {
           _id: null,
-          avg:   { $avg: '$rating' },
+          avg: { $avg: '$rating' },
           count: { $sum: 1 },
         },
       },

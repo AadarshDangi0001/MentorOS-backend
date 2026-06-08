@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { verifyAccessToken } from '../../utils/jwt';
-import { isTokenBlacklisted } from '../../config/redis';
+import { isTokenBlacklisted, getUserSession, setUserSession } from '../../config/redis';
 import { User } from '../../models/User.model';
 import { ApiError } from '../../utils/ApiError';
 import { IAuthRequest, UserRole, UserStatus } from '../../types';
@@ -24,8 +24,23 @@ export const authenticate = async (
 
     const decoded = verifyAccessToken(token);
 
-    const user = await User.findById(decoded.id).select('+refreshTokens');
-    if (!user) return next(ApiError.unauthorized('User not found'));
+    let user;
+    const cachedUser = await getUserSession(decoded.id);
+    if (cachedUser) {
+      const userObj = JSON.parse(cachedUser);
+      user = new User(userObj);
+      user.isNew = false;
+    } else {
+      user = await User.findById(decoded.id).select('+refreshTokens');
+      if (!user) return next(ApiError.unauthorized('User not found'));
+
+      // Cache user session for 5 minutes (300 seconds)
+      await setUserSession(
+        decoded.id,
+        JSON.stringify(user.toObject({ virtuals: true, getters: true })),
+        300
+      );
+    }
 
     // Block BLOCKED and DELETED users at the gate
     if (user.role === UserRole.BLOCKED) {

@@ -8,9 +8,7 @@ import { userDAO } from '../../dao/user.dao';
  * and user upsert. This service handles everything after that.
  */
 export class GoogleAuthService {
-  async handleOAuthCallback(
-    user: IUser
-  ): Promise<{ user: IUser; tokens: IAuthTokens }> {
+  async handleOAuthCallback(user: IUser): Promise<{ user: IUser; tokens: IAuthTokens }> {
     // Issue JWT tokens
     const tokens = generateAuthTokens(user._id.toString(), user.role);
 

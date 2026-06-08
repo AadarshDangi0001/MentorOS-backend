@@ -9,6 +9,7 @@ import { packageDAO } from '../../dao/package.dao';
 import { ApiError } from '../../utils/ApiError';
 import { ENV } from '../../config/env';
 import logger from '../../utils/logger';
+import { acquireLock, releaseLock } from '../../config/redis';
 
 let razorpay: Razorpay;
 
@@ -33,51 +34,64 @@ export class PaymentService {
     packageId: string,
     availabilityId: string
   ) {
-    // --- validate package
-    const pkg = await packageDAO.findById(packageId);
-    if (!pkg || !pkg.isActive) throw ApiError.notFound('Package not found or inactive');
-    if (pkg.mentor.toString() !== mentorId) throw ApiError.badRequest('Package does not belong to this mentor');
+    const lockKey = `lock:slot:${availabilityId}`;
+    const locked = await acquireLock(lockKey, 5000); // 5-second lock
+    if (!locked) {
+      throw ApiError.conflict(
+        'This slot is currently being booked by another user. Please try again in a moment.'
+      );
+    }
 
-    // --- validate & lock slot atomically
-    const slot = await availabilityDAO.markBooked(availabilityId);
-    if (!slot) throw ApiError.conflict('Slot is no longer available');
+    try {
+      // --- validate package
+      const pkg = await packageDAO.findById(packageId);
+      if (!pkg || !pkg.isActive) throw ApiError.notFound('Package not found or inactive');
+      if (pkg.mentor.toString() !== mentorId)
+        throw ApiError.badRequest('Package does not belong to this mentor');
 
-    // --- create pending booking
-    const booking = await bookingDAO.create({
-      student:      new Types.ObjectId(studentId),
-      mentor:       new Types.ObjectId(mentorId),
-      package:      new Types.ObjectId(packageId),
-      availability: new Types.ObjectId(availabilityId),
-      scheduledAt:  slot.startTime,
-      duration:     pkg.duration,
-    });
+      // --- validate & lock slot atomically
+      const slot = await availabilityDAO.markBooked(availabilityId);
+      if (!slot) throw ApiError.conflict('Slot is no longer available');
 
-    // --- create Razorpay order (amount in paise)
-    const rp = getRazorpay();
-    const order = await rp.orders.create({
-      amount:   pkg.price * 100,
-      currency: 'INR',
-      receipt:  booking._id.toString(),
-    });
+      // --- create pending booking
+      const booking = await bookingDAO.create({
+        student: new Types.ObjectId(studentId),
+        mentor: new Types.ObjectId(mentorId),
+        package: new Types.ObjectId(packageId),
+        availability: new Types.ObjectId(availabilityId),
+        scheduledAt: slot.startTime,
+        duration: pkg.duration,
+      });
 
-    // --- persist payment record
-    const payment = await paymentDAO.create({
-      booking: booking._id,
-      student: new Types.ObjectId(studentId),
-      amount:  pkg.price * 100,
-      gatewayOrderId: order.id,
-    });
+      // --- create Razorpay order (amount in paise)
+      const rp = getRazorpay();
+      const order = await rp.orders.create({
+        amount: pkg.price * 100,
+        currency: 'INR',
+        receipt: booking._id.toString(),
+      });
 
-    await bookingDAO.setPayment(booking._id.toString(), payment._id);
+      // --- persist payment record
+      const payment = await paymentDAO.create({
+        booking: booking._id,
+        student: new Types.ObjectId(studentId),
+        amount: pkg.price * 100,
+        gatewayOrderId: order.id,
+      });
 
-    return {
-      orderId:    order.id,
-      amount:     order.amount,
-      currency:   order.currency,
-      bookingId:  booking._id,
-      paymentId:  payment._id,
-      keyId:      ENV.RAZORPAY_KEY_ID,
-    };
+      await bookingDAO.setPayment(booking._id.toString(), payment._id);
+
+      return {
+        orderId: order.id,
+        amount: order.amount,
+        currency: order.currency,
+        bookingId: booking._id,
+        paymentId: payment._id,
+        keyId: ENV.RAZORPAY_KEY_ID,
+      };
+    } finally {
+      await releaseLock(lockKey);
+    }
   }
 
   /**
@@ -90,8 +104,8 @@ export class PaymentService {
     meetingData: { roomId: string; provider: string; meetingLink: string; hostLink?: string }
   ) {
     // Verify signature
-    const body       = `${razorpayOrderId}|${razorpayPaymentId}`;
-    const expected   = crypto
+    const body = `${razorpayOrderId}|${razorpayPaymentId}`;
+    const expected = crypto
       .createHmac('sha256', ENV.RAZORPAY_KEY_SECRET)
       .update(body)
       .digest('hex');
@@ -116,15 +130,13 @@ export class PaymentService {
 
     // Create meeting record (from your existing meet backend)
     const meeting = await meetingDAO.create({
-      booking:  payment.booking,
-      roomId:   meetingData.roomId,
+      booking: payment.booking,
+      roomId: meetingData.roomId,
       provider: meetingData.provider,
       meetingLink: meetingData.meetingLink,
-      hostLink:    meetingData.hostLink,
+      hostLink: meetingData.hostLink,
       startTime: booking.scheduledAt,
-      endTime:   new Date(
-        new Date(booking.scheduledAt).getTime() + booking.duration * 60 * 1000
-      ),
+      endTime: new Date(new Date(booking.scheduledAt).getTime() + booking.duration * 60 * 1000),
     });
 
     // Confirm booking + attach meeting
@@ -135,7 +147,7 @@ export class PaymentService {
 
     return {
       alreadyConfirmed: false,
-      bookingId:   payment.booking,
+      bookingId: payment.booking,
       meetingLink: meeting.meetingLink,
     };
   }

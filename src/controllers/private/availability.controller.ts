@@ -8,13 +8,11 @@ export class AvailabilityController {
     try {
       const userId = (req as IAuthRequest).user!._id.toString();
       const { startTime, endTime } = req.body;
-      const slot = await availabilityService.create(
-        userId,
-        new Date(startTime),
-        new Date(endTime)
-      );
+      const slot = await availabilityService.create(userId, new Date(startTime), new Date(endTime));
       sendCreated(res, { slot }, 'Availability slot created');
-    } catch (e) { next(e); }
+    } catch (e) {
+      next(e);
+    }
   }
 
   async getByMentor(req: Request, res: Response, next: NextFunction) {
@@ -22,7 +20,9 @@ export class AvailabilityController {
       const onlyAvailable = req.query.available === 'true';
       const slots = await availabilityService.getByMentor(req.params.mentorId, onlyAvailable);
       sendSuccess(res, { slots });
-    } catch (e) { next(e); }
+    } catch (e) {
+      next(e);
+    }
   }
 
   async delete(req: Request, res: Response, next: NextFunction) {
@@ -30,7 +30,9 @@ export class AvailabilityController {
       const userId = (req as IAuthRequest).user!._id.toString();
       await availabilityService.delete(userId, req.params.slotId);
       sendSuccess(res, null, 'Slot deleted');
-    } catch (e) { next(e); }
+    } catch (e) {
+      next(e);
+    }
   }
 }
 

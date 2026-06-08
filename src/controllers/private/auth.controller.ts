@@ -12,7 +12,9 @@ export class PrivateAuthController {
       await authService.logout(authReq.user!._id.toString(), accessToken, refreshToken);
       res.clearCookie('refreshToken');
       sendSuccess(res, null, 'Logged out successfully');
-    } catch (error) { next(error); }
+    } catch (error) {
+      next(error);
+    }
   }
 
   async changePassword(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -27,7 +29,9 @@ export class PrivateAuthController {
       );
       res.clearCookie('refreshToken');
       sendSuccess(res, null, 'Password changed. Please login again.');
-    } catch (error) { next(error); }
+    } catch (error) {
+      next(error);
+    }
   }
 
   async getMe(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -35,7 +39,9 @@ export class PrivateAuthController {
       const authReq = req as IAuthRequest;
       const user = await authService.getMe(authReq.user!._id.toString());
       sendSuccess(res, { user });
-    } catch (error) { next(error); }
+    } catch (error) {
+      next(error);
+    }
   }
 }
 

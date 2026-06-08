@@ -16,10 +16,10 @@ export class MeetingController {
       const booking = await bookingDAO.findById(bookingId);
       if (!booking) throw ApiError.notFound('Booking not found');
 
-      const studentId = (booking.student as { _id: Types.ObjectId })._id?.toString()
-        ?? booking.student.toString();
-      const mentorId  = (booking.mentor  as { _id: Types.ObjectId })._id?.toString()
-        ?? booking.mentor.toString();
+      const studentId =
+        (booking.student as { _id: Types.ObjectId })._id?.toString() ?? booking.student.toString();
+      const mentorId =
+        (booking.mentor as { _id: Types.ObjectId })._id?.toString() ?? booking.mentor.toString();
 
       if (studentId !== userId && mentorId !== userId) {
         throw ApiError.forbidden('Access denied');
@@ -29,7 +29,9 @@ export class MeetingController {
       if (!meeting) throw ApiError.notFound('Meeting not found');
 
       sendSuccess(res, { meeting });
-    } catch (e) { next(e); }
+    } catch (e) {
+      next(e);
+    }
   }
 }
 

@@ -20,9 +20,7 @@ export const errorHandler = (
 
   // Invalid ObjectId
   if (err instanceof mongoose.Error.CastError) {
-    error = ApiError.badRequest(
-      `Invalid ${err.path}: ${err.value}`
-    );
+    error = ApiError.badRequest(`Invalid ${err.path}: ${err.value}`);
   }
 
   // Duplicate key
@@ -34,12 +32,9 @@ export const errorHandler = (
   ) {
     const mongoError = err as MongoDuplicateKeyError;
 
-    const field =
-      Object.keys(mongoError.keyValue)[0] ?? 'Field';
+    const field = Object.keys(mongoError.keyValue)[0] ?? 'Field';
 
-    error = ApiError.conflict(
-      `${field} already exists`
-    );
+    error = ApiError.conflict(`${field} already exists`);
   }
 
   // Validation error
@@ -48,10 +43,7 @@ export const errorHandler = (
       [e.path]: e.message,
     }));
 
-    error = ApiError.badRequest(
-      'Validation failed',
-      errors
-    );
+    error = ApiError.badRequest('Validation failed', errors);
   }
 
   // Operational error
@@ -61,45 +53,29 @@ export const errorHandler = (
 
   // Unknown error
   else {
-    const message =
-      err instanceof Error
-        ? err.message
-        : 'Internal server error';
+    const message = err instanceof Error ? err.message : 'Internal server error';
 
     error = ApiError.internal(message);
   }
 
   if (!error.isOperational) {
-    logger.error(
-      `[${req.method}] ${req.path}`,
-      err instanceof Error ? err.stack : err
-    );
+    logger.error(`[${req.method}] ${req.path}`, err instanceof Error ? err.stack : err);
   }
 
   const response: IApiResponse = {
     success: false,
     message: error.message,
     ...(error.errors && { errors: error.errors }),
-    ...(
-      !ENV.IS_PROD &&
+    ...(!ENV.IS_PROD &&
       !error.isOperational &&
       err instanceof Error && {
         stack: err.stack,
-      }
-    ),
+      }),
   };
 
   res.status(error.statusCode).json(response);
 };
 
-export const notFoundHandler = (
-  req: Request,
-  _res: Response,
-  next: NextFunction
-): void => {
-  next(
-    ApiError.notFound(
-      `Route ${req.method} ${req.originalUrl} not found`
-    )
-  );
+export const notFoundHandler = (req: Request, _res: Response, next: NextFunction): void => {
+  next(ApiError.notFound(`Route ${req.method} ${req.originalUrl} not found`));
 };

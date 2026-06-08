@@ -27,8 +27,7 @@ export class GoogleAuthController {
       res.cookie('refreshToken', tokens.refreshToken, COOKIE_OPTIONS);
 
       const wantsJson =
-        req.headers.accept?.includes('application/json') ||
-        req.query.response_type === 'json';
+        req.headers.accept?.includes('application/json') || req.query.response_type === 'json';
 
       if (wantsJson) {
         res.status(200).json({

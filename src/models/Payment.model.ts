@@ -5,10 +5,10 @@ const PaymentSchema = new Schema<IPayment>(
   {
     booking: { type: Schema.Types.ObjectId, ref: 'Booking', required: true, unique: true },
     student: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
-    amount:   { type: Number, required: true },   // paise
+    amount: { type: Number, required: true }, // paise
     currency: { type: String, default: 'INR' },
-    gateway:  { type: String, enum: ['razorpay'], default: 'razorpay' },
-    gatewayOrderId:   { type: String, required: true, unique: true, index: true },
+    gateway: { type: String, enum: ['razorpay'], default: 'razorpay' },
+    gatewayOrderId: { type: String, required: true, unique: true, index: true },
     gatewayPaymentId: { type: String, index: true },
     gatewaySignature: { type: String },
     status: {

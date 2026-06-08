@@ -11,8 +11,8 @@ router.get('/:mentorId', availabilityController.getByMentor.bind(availabilityCon
 
 // Mentor-only
 router.use(authenticate, authorize(UserRole.MENTOR));
-router.post('/',              availabilityController.create.bind(availabilityController));
-router.delete('/:slotId',     availabilityController.delete.bind(availabilityController));
+router.post('/', availabilityController.create.bind(availabilityController));
+router.delete('/:slotId', availabilityController.delete.bind(availabilityController));
 
 // SUPER_ADMIN also bypasses via authorize Strategy
 

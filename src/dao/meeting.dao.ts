@@ -15,7 +15,7 @@ export class MeetingDAO {
     return Meeting.create(data);
   }
 
-async findByBooking(bookingId: string) { 
+  async findByBooking(bookingId: string) {
     return Meeting.findOne({ booking: bookingId }).lean();
   }
 }

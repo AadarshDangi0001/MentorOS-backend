@@ -32,12 +32,42 @@ router.get(
 router.get('/google/failure', googleAuthController.googleFailure.bind(googleAuthController));
 
 // ─── Local Auth ───────────────────────────────────────────────
-router.post('/register',    authLimiter, registerValidator, validate, authController.register.bind(authController));
-router.post('/login',       authLimiter, loginValidator, validate, authController.login.bind(authController));
-router.post('/refresh',     authController.refreshToken.bind(authController));
+router.post(
+  '/register',
+  authLimiter,
+  registerValidator,
+  validate,
+  authController.register.bind(authController)
+);
+router.post(
+  '/login',
+  authLimiter,
+  loginValidator,
+  validate,
+  authController.login.bind(authController)
+);
+router.post('/refresh', authController.refreshToken.bind(authController));
 router.get('/verify-email/:token', authController.verifyEmail.bind(authController));
-router.post('/resend-verification', passwordResetLimiter, resendVerificationValidator, validate, authController.resendVerificationEmail.bind(authController));
-router.post('/forgot-password', passwordResetLimiter, forgotPasswordValidator, validate, authController.forgotPassword.bind(authController));
-router.post('/reset-password/:token', passwordResetLimiter, resetPasswordValidator, validate, authController.resetPassword.bind(authController));
+router.post(
+  '/resend-verification',
+  passwordResetLimiter,
+  resendVerificationValidator,
+  validate,
+  authController.resendVerificationEmail.bind(authController)
+);
+router.post(
+  '/forgot-password',
+  passwordResetLimiter,
+  forgotPasswordValidator,
+  validate,
+  authController.forgotPassword.bind(authController)
+);
+router.post(
+  '/reset-password/:token',
+  passwordResetLimiter,
+  resetPasswordValidator,
+  validate,
+  authController.resetPassword.bind(authController)
+);
 
 export default router;

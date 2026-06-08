@@ -1,5 +1,5 @@
-import mongoose, { Schema } from "mongoose";
-import { IMentor, MentorStatus } from "../types";
+import mongoose, { Schema } from 'mongoose';
+import { IMentor, MentorStatus } from '../types';
 
 const AvailabilitySchema = new Schema(
   {
@@ -7,14 +7,14 @@ const AvailabilitySchema = new Schema(
     startTime: { type: String, required: true },
     endTime: { type: String, required: true },
   },
-  { _id: false },
+  { _id: false }
 );
 
 const MentorSchema = new Schema<IMentor>(
   {
     user: {
       type: Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
       required: true,
       unique: true,
     },
@@ -30,7 +30,7 @@ const MentorSchema = new Schema<IMentor>(
     linkedIn: { type: String, trim: true },
     github: { type: String, trim: true },
     hourlyRate: { type: Number, min: 0 },
-    languages: [{ type: String, default: ["English"] }],
+    languages: [{ type: String, default: ['English'] }],
     rating: { type: Number, default: 0, min: 0, max: 5 },
     totalReviews: { type: Number, default: 0 },
     totalSessions: { type: Number, default: 0 },
@@ -38,7 +38,7 @@ const MentorSchema = new Schema<IMentor>(
     isVerified: { type: Boolean, default: false },
     documents: [{ type: String }],
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 MentorSchema.index({ user: 1 });
@@ -46,4 +46,4 @@ MentorSchema.index({ mentorStatus: 1 });
 MentorSchema.index({ expertise: 1 });
 MentorSchema.index({ rating: -1 });
 
-export const Mentor = mongoose.model<IMentor>("Mentor", MentorSchema);
+export const Mentor = mongoose.model<IMentor>('Mentor', MentorSchema);
