@@ -41,5 +41,6 @@ export const ENV = {
 
   // Razorpay
   RAZORPAY_KEY_ID: required('RAZORPAY_KEY_ID'),
+  RAZORPAY_WEBHOOK_SECRET: required('RAZORPAY_WEBHOOK_SECRET'),
   RAZORPAY_KEY_SECRET: required('RAZORPAY_KEY_SECRET'),
 };
