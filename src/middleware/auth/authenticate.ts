@@ -3,7 +3,7 @@ import { verifyAccessToken } from '../../utils/jwt';
 import { isTokenBlacklisted } from '../../config/redis';
 import { User } from '../../models/User.model';
 import { ApiError } from '../../utils/ApiError';
-import { IAuthRequest, UserStatus } from '../../types';
+import { IAuthRequest, UserRole, UserStatus } from '../../types';
 
 export const authenticate = async (
   req: Request,
@@ -26,6 +26,14 @@ export const authenticate = async (
 
     const user = await User.findById(decoded.id).select('+refreshTokens');
     if (!user) return next(ApiError.unauthorized('User not found'));
+
+    // Block BLOCKED and DELETED users at the gate
+    if (user.role === UserRole.BLOCKED) {
+      return next(ApiError.forbidden('Your account has been blocked. Contact support.'));
+    }
+    if (user.role === UserRole.DELETED) {
+      return next(ApiError.forbidden('This account has been deleted.'));
+    }
 
     if (user.status === UserStatus.SUSPENDED) {
       return next(ApiError.forbidden('Your account has been suspended'));

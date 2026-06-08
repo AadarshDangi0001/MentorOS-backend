@@ -54,7 +54,7 @@ if (!ENV.IS_PROD) {
 } else {
   app.use(morgan('combined', {
     stream: { write: (msg) => logger.http(msg.trim()) },
-    skip: (req, res) => res.statusCode < 400, // Only log errors in prod
+    skip: (_req, res) => res.statusCode < 400, // Only log errors in prod
   }));
 }
 

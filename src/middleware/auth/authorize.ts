@@ -6,6 +6,8 @@ export const authorize = (...roles: UserRole[]) =>
   (req: Request, _res: Response, next: NextFunction): void => {
     const authReq = req as IAuthRequest;
     if (!authReq.user) return next(ApiError.unauthorized());
+    // SUPER_ADMIN can access all routes
+    if (authReq.user.role === UserRole.SUPER_ADMIN) return next();
     if (!roles.includes(authReq.user.role)) {
       return next(ApiError.forbidden(`Access denied. Required role: ${roles.join(' or ')}`));
     }

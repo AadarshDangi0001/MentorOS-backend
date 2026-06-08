@@ -37,7 +37,7 @@ export const ENV = {
   GOOGLE_CLIENT_SECRET: required('GOOGLE_CLIENT_SECRET'),
   GOOGLE_CALLBACK_URL:
     process.env.GOOGLE_CALLBACK_URL ||
-    'http://localhost:5000/api/v1/auth/google/callback',
+    'http://localhost:3000/api/v1/public/auth/google/callback',
 
   // Razorpay
   RAZORPAY_KEY_ID: required('RAZORPAY_KEY_ID'),

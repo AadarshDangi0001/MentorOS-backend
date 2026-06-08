@@ -26,27 +26,27 @@ passport.use(
         const name = profile.displayName || email.split('@')[0];
 
         // ── Case 1: user already linked Google ────────────────
-        let user = await User.findOne({ googleId }).select('+refreshTokens');
-        if (user) {
+        const googleUser = await User.findOne({ googleId }).select('+refreshTokens');
+        if (googleUser) {
           // Update avatar in case it changed
-          if (avatar && user.avatar !== avatar) {
-            user.avatar = avatar;
-            await user.save();
+          if (avatar && googleUser.avatar !== avatar) {
+            googleUser.avatar = avatar;
+            await googleUser.save();
           }
-          return done(null, user);
+          return done(null, googleUser);
         }
 
         // ── Case 2: existing local account with same email ────
-        user = await User.findOne({ email }).select('+refreshTokens +googleId');
-        if (user) {
+        const localUser = await User.findOne({ email }).select('+refreshTokens +googleId');
+        if (localUser) {
           // Link Google to existing account
-          user.googleId = googleId;
-          user.authProvider = AuthProvider.GOOGLE;
-          user.isEmailVerified = true;
-          user.status = UserStatus.ACTIVE;
-          if (avatar && !user.avatar) user.avatar = avatar;
-          await user.save();
-          return done(null, user);
+          localUser.googleId = googleId;
+          localUser.authProvider = AuthProvider.GOOGLE;
+          localUser.isEmailVerified = true;
+          localUser.status = UserStatus.ACTIVE;
+          if (avatar && !localUser.avatar) localUser.avatar = avatar;
+          await localUser.save();
+          return done(null, localUser);
         }
 
         // ── Case 3: brand new user via Google ─────────────────

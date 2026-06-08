@@ -3,9 +3,12 @@ import { Document, Types } from 'mongoose';
 
 // ─── Enums ────────────────────────────────────────────────────
 export enum UserRole {
+  BLOCKED = 'blocked',
+  DELETED = 'deleted',
   STUDENT = 'student',
   MENTOR = 'mentor',
   ADMIN = 'admin',
+  SUPER_ADMIN = 'super_admin',
 }
 
 export enum UserStatus {

@@ -39,7 +39,7 @@ verifyEmail: (name: string, token: string, clientUrl: string) => ({
     <p>Please verify your email by clicking the link below:</p>
 
     <a
-      href="http://localhost:3000/api/v1/auth/verify-email/${token}"
+      href="${clientUrl}/verify-email/${token}"
       style="background:#4F46E5;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block"
     >
       Verify Email
