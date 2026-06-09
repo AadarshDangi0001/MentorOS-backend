@@ -28,6 +28,7 @@ export const ENV = {
   FROM_NAME: process.env.FROM_NAME || 'Propeers',
 
   CLIENT_URL: process.env.CLIENT_URL || 'http://localhost:3000',
+  BACKEND_URL: process.env.BACKEND_URL || 'http://localhost:3000',
   COOKIE_SECRET: required('COOKIE_SECRET'),
 
   RATE_LIMIT_WINDOW_MS: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000', 10),

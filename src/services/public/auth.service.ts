@@ -39,7 +39,7 @@ export class PublicAuthService {
 
     // send verification email (non-blocking)
     try {
-      const { subject, html } = emailTemplates.verifyEmail(name, verificationToken, ENV.CLIENT_URL);
+      const { subject, html } = emailTemplates.verifyEmail(name, verificationToken, ENV.BACKEND_URL);
       await sendEmail({ to: email, subject, html });
     } catch (err) {
       logger.error('Verification email failed:', err);
@@ -130,7 +130,7 @@ export class PublicAuthService {
     await userDAO.setVerificationToken(user._id, hashedToken, expires);
 
     try {
-      const { subject, html } = emailTemplates.verifyEmail(user.name, rawToken, ENV.CLIENT_URL);
+      const { subject, html } = emailTemplates.verifyEmail(user.name, rawToken, ENV.BACKEND_URL);
       await sendEmail({ to: user.email, subject, html });
     } catch (err) {
       // Rollback token so user can try again

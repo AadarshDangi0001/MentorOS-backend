@@ -32,14 +32,14 @@ export const sendEmail = async (options: IEmailOptions): Promise<void> => {
 };
 
 export const emailTemplates = {
-  verifyEmail: (name: string, token: string, clientUrl: string) => ({
+  verifyEmail: (name: string, token: string, backendUrl: string) => ({
     subject: 'Verify your Propeers account',
     html: `
     <h2>Welcome to Propeers, ${name}!</h2>
     <p>Please verify your email by clicking the link below:</p>
 
     <a
-      href="${clientUrl}/verify-email/${token}"
+      href="${backendUrl}/api/v1/public/auth/verify-email/${token}"
       style="background:#4F46E5;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block"
     >
       Verify Email
