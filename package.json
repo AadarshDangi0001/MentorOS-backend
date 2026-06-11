@@ -4,7 +4,7 @@
   "description": "Production-ready backend for Propeers platform",
   "main": "dist/server.js",
   "scripts": {
-    "dev": "nodemon --watch src -e ts,json --exec ts-node src/server.ts",
+    "dev": "nodemon --watch src --watch .env -e ts,json --exec ts-node src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
     "lint": "eslint src --ext .ts",
@@ -15,6 +15,7 @@
     "test": "jest --coverage"
   },
   "dependencies": {
+    "@imagekit/nodejs": "^7.7.0",
     "bcryptjs": "^2.4.3",
     "compression": "^1.7.4",
     "cookie-parser": "^1.4.6",
@@ -29,6 +30,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.4.4",
     "morgan": "^1.10.0",
+    "multer": "^2.1.1",
     "nodemailer": "^6.9.14",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
@@ -49,6 +51,7 @@
     "@types/hpp": "^0.2.6",
     "@types/jsonwebtoken": "^9.0.6",
     "@types/morgan": "^1.9.9",
+    "@types/multer": "^2.1.0",
     "@types/node": "^20.14.10",
     "@types/nodemailer": "^6.4.15",
     "@types/passport": "^1.0.17",

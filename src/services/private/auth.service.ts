@@ -1,7 +1,7 @@
 import { userDAO } from '../../dao/user.dao';
 import { ApiError } from '../../utils/ApiError';
 import { getTokenTTL } from '../../utils/jwt';
-import { blacklistToken } from '../../config/redis';
+import { blacklistToken, deleteUserSession } from '../../config/redis';
 import { IUser } from '../../types';
 import { User } from '../../models/User.model';
 
@@ -62,6 +62,10 @@ export class PrivateAuthService {
       { new: true, runValidators: true }
     );
     if (!user) throw ApiError.notFound('User not found');
+
+    // Invalidate cached user session in Redis so subsequent requests get updated data
+    await deleteUserSession(userId);
+
     return user;
   }
 }

@@ -175,6 +175,9 @@ export class PublicAuthService {
     await userDAO.setPasswordResetToken(user._id, hashedToken, expires);
 
     try {
+      if (ENV.NODE_ENV === 'development') {
+        logger.info(`[DEV] Password reset link: ${ENV.FRONTEND_URL}/reset-password/${resetToken}`);
+      }
       const { subject, html } = emailTemplates.resetPassword(user.name, resetToken, ENV.FRONTEND_URL);
       await sendEmail({ to: email, subject, html });
     } catch (err) {

@@ -44,8 +44,8 @@ passport.use(
         // ── Case 1: user already linked Google ────────────────
         const googleUser = await User.findOne({ googleId }).select('+refreshTokens');
         if (googleUser) {
-          // Update avatar in case it changed
-          if (avatar && googleUser.avatar !== avatar) {
+          // Do not overwrite user's custom avatar with Google profile image on login
+          if (avatar && !googleUser.avatar) {
             googleUser.avatar = avatar;
             await googleUser.save();
           }
