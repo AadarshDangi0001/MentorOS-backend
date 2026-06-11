@@ -7,7 +7,7 @@ import { bookingDAO } from '../../dao/booking.dao';
 import { paymentDAO } from '../../dao/payment.dao';
 import { sendSuccess } from '../../utils/ApiResponse';
 import { ApiError } from '../../utils/ApiError';
-import { MentorStatus, UserStatus, UserRole } from '../../types';
+import { MentorStatus, UserStatus, UserRole, IAuthRequest } from '../../types';
 import { deleteUserSession, deleteCache, deleteKeysByPattern } from '../../config/redis';
 
 export class AdminController {
@@ -35,15 +35,23 @@ export class AdminController {
 
   async blockUser(req: Request, res: Response, next: NextFunction) {
     try {
+      const authReq = req as IAuthRequest;
+      const actor = authReq.user;
+      const targetId = req.params.id;
+
+      if (actor && actor._id.toString() === targetId) {
+        throw ApiError.forbidden('You cannot block yourself');
+      }
+
       const user = await User.findByIdAndUpdate(
-        req.params.id,
+        targetId,
         { $set: { role: UserRole.BLOCKED, status: UserStatus.SUSPENDED } },
         { new: true }
       ).select('-password -refreshTokens');
       if (!user) throw ApiError.notFound('User not found');
 
       // Invalidate user session cache
-      await deleteUserSession(req.params.id);
+      await deleteUserSession(targetId);
 
       sendSuccess(res, { user }, 'User blocked');
     } catch (e) {
@@ -78,15 +86,23 @@ export class AdminController {
 
   async deleteUser(req: Request, res: Response, next: NextFunction) {
     try {
+      const authReq = req as IAuthRequest;
+      const actor = authReq.user;
+      const targetId = req.params.id;
+
+      if (actor && actor._id.toString() === targetId) {
+        throw ApiError.forbidden('You cannot delete yourself');
+      }
+
       const user = await User.findByIdAndUpdate(
-        req.params.id,
+        targetId,
         { $set: { role: UserRole.DELETED, status: UserStatus.INACTIVE } },
         { new: true }
       ).select('-password -refreshTokens');
       if (!user) throw ApiError.notFound('User not found');
 
       // Invalidate user session cache
-      await deleteUserSession(req.params.id);
+      await deleteUserSession(targetId);
 
       sendSuccess(res, null, 'User marked as deleted');
     } catch (e) {
@@ -96,9 +112,28 @@ export class AdminController {
 
   async changeUserRole(req: Request, res: Response, next: NextFunction) {
     try {
+      const authReq = req as IAuthRequest;
+      const actor = authReq.user;
+      const targetId = req.params.id;
       const { role } = req.body;
+
       if (!role || !Object.values(UserRole).includes(role)) {
         throw ApiError.badRequest('Invalid or missing role');
+      }
+
+      if (!actor) {
+        throw ApiError.unauthorized('User not authenticated');
+      }
+
+      // Authorization check:
+      // 1. Nobody (neither ADMIN nor SUPER_ADMIN) can change their own role.
+      if (actor._id.toString() === targetId) {
+        throw ApiError.forbidden('You cannot change your own role');
+      }
+
+      // 2. Only SUPER_ADMIN can change user roles.
+      if (actor.role !== UserRole.SUPER_ADMIN) {
+        throw ApiError.forbidden('Only super admins can modify user roles');
       }
 
       const updateData: Record<string, any> = { role };
@@ -111,14 +146,14 @@ export class AdminController {
       }
 
       const user = await User.findByIdAndUpdate(
-        req.params.id,
+        targetId,
         { $set: updateData },
         { new: true }
       ).select('-password -refreshTokens');
       if (!user) throw ApiError.notFound('User not found');
 
       // Invalidate user session cache
-      await deleteUserSession(req.params.id);
+      await deleteUserSession(targetId);
 
       sendSuccess(res, { user }, 'User role updated successfully');
     } catch (e) {
@@ -187,6 +222,70 @@ export class AdminController {
       ]);
       sendSuccess(res, { mentors, total }, undefined, 200);
       return;
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  async createMentor(req: Request, res: Response, next: NextFunction) {
+    try {
+      const {
+        name,
+        email,
+        password,
+        mentorStatus,
+        isVerified,
+        expertise,
+        experience,
+        currentRole,
+        company,
+        linkedIn,
+        github,
+        hourlyRate,
+        languages,
+      } = req.body;
+
+      if (!name || !email || !password) {
+        throw ApiError.badRequest('Name, email, and password are required');
+      }
+
+      // Check if user already exists
+      const existingUser = await User.findOne({ email });
+      if (existingUser) {
+        throw ApiError.badRequest('A user with this email already exists');
+      }
+
+      // Create new user
+      const user = new User({
+        name,
+        email,
+        password,
+        role: UserRole.MENTOR,
+        status: UserStatus.ACTIVE,
+        isEmailVerified: true,
+      });
+      await user.save();
+
+      // Create corresponding mentor document
+      const mentor = new Mentor({
+        user: user._id,
+        mentorStatus: mentorStatus || MentorStatus.APPROVED,
+        isVerified: isVerified !== undefined ? isVerified : true,
+        expertise: expertise || [],
+        experience: experience || 0,
+        currentRole: currentRole || '',
+        company: company || '',
+        linkedIn: linkedIn || '',
+        github: github || '',
+        hourlyRate: hourlyRate || 0,
+        languages: languages || ['English'],
+      });
+      await mentor.save();
+
+      // Invalidate explore list caches
+      await deleteKeysByPattern('explore:mentors:list:*');
+
+      sendSuccess(res, { user, mentor }, 'Mentor profile created successfully', 201);
     } catch (e) {
       next(e);
     }
