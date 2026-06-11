@@ -11,6 +11,7 @@ router.use(authenticate, authorize(UserRole.ADMIN, UserRole.SUPER_ADMIN));
 
 router.get('/stats', adminController.getStats.bind(adminController));
 router.get('/users', adminController.listUsers.bind(adminController));
+router.get('/mentors', adminController.listMentors.bind(adminController));
 router.patch('/users/:id/block', adminController.blockUser.bind(adminController));
 router.patch('/users/:id/unblock', adminController.unblockUser.bind(adminController));
 router.patch('/users/:id/delete', adminController.deleteUser.bind(adminController));

@@ -18,9 +18,16 @@ export class AvailabilityService {
     if (startTime <= new Date()) throw ApiError.badRequest('Slot must be in the future');
     if (endTime <= startTime) throw ApiError.badRequest('End time must be after start time');
 
+    const oneMonthFromNow = new Date();
+    oneMonthFromNow.setMonth(oneMonthFromNow.getMonth() + 1);
+    if (startTime > oneMonthFromNow) {
+      throw ApiError.badRequest('You can only create availability slots within 1 month from now');
+    }
+
     const durationMs = endTime.getTime() - startTime.getTime();
-    if (durationMs < 15 * 60 * 1000) throw ApiError.badRequest('Slot must be at least 15 minutes');
-    if (durationMs > 4 * 60 * 60 * 1000) throw ApiError.badRequest('Slot cannot exceed 4 hours');
+    if (durationMs !== 60 * 60 * 1000) {
+      throw ApiError.badRequest('Slot duration must be exactly 1 hour (60 minutes)');
+    }
 
     const overlap = await availabilityDAO.hasOverlap(userId, startTime, endTime);
     if (overlap) throw ApiError.conflict('Slot overlaps with an existing slot');

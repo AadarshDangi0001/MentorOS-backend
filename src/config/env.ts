@@ -28,6 +28,10 @@ export const ENV = {
   FROM_NAME: process.env.FROM_NAME || 'Propeers',
 
   CLIENT_URL: process.env.CLIENT_URL || 'http://localhost:3000',
+  get FRONTEND_URL(): string {
+    const urls = this.CLIENT_URL.split(',').map((u) => u.trim());
+    return urls.find((u) => !u.includes(':3000')) || urls[0] || 'http://localhost:5173';
+  },
   BACKEND_URL: process.env.BACKEND_URL || 'http://localhost:3000',
   COOKIE_SECRET: required('COOKIE_SECRET'),
 

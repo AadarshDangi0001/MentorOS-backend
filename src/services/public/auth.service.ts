@@ -175,7 +175,7 @@ export class PublicAuthService {
     await userDAO.setPasswordResetToken(user._id, hashedToken, expires);
 
     try {
-      const { subject, html } = emailTemplates.resetPassword(user.name, resetToken, ENV.CLIENT_URL);
+      const { subject, html } = emailTemplates.resetPassword(user.name, resetToken, ENV.FRONTEND_URL);
       await sendEmail({ to: email, subject, html });
     } catch (err) {
       // [DAO] rollback token if email fails

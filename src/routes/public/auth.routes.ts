@@ -1,5 +1,7 @@
 import { Router } from 'express';
 import passport from 'passport';
+import { ENV } from '../../config/env';
+import logger from '../../utils/logger';
 import { authController } from '../../controllers/public/auth.controller';
 import { googleAuthController } from '../../controllers/public/google-auth.controller';
 import { authLimiter, passwordResetLimiter } from '../../middleware/rateLimiter';
@@ -17,15 +19,28 @@ const router = Router();
 // ─── Google OAuth ─────────────────────────────────────────────
 router.get(
   '/google',
-  passport.authenticate('google', { scope: ['profile', 'email'], session: false })
+  (req, res, next) => {
+    const role = req.query.role === 'mentor' ? 'mentor' : 'student';
+    passport.authenticate('google', {
+      scope: ['profile', 'email'],
+      session: false,
+      state: JSON.stringify({ role }),
+    })(req, res, next);
+  }
 );
 
 router.get(
   '/google/callback',
-  passport.authenticate('google', {
-    session: false,
-    failureRedirect: '/api/v1/public/auth/google/failure',
-  }),
+  (req, res, next) => {
+    passport.authenticate('google', { session: false }, (err, user, _info) => {
+      if (err || !user) {
+        logger.error('Google OAuth callback strategy/token error:', err || 'No user returned');
+        return res.redirect(`${ENV.FRONTEND_URL}/?error=google_auth_failed`);
+      }
+      req.user = user;
+      next();
+    })(req, res, next);
+  },
   googleAuthController.googleCallback.bind(googleAuthController)
 );
 

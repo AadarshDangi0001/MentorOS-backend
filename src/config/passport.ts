@@ -13,8 +13,9 @@ passport.use(
       clientSecret: ENV.GOOGLE_CLIENT_SECRET,
       callbackURL: ENV.GOOGLE_CALLBACK_URL,
       scope: ['profile', 'email'],
+      passReqToCallback: true,
     },
-    async (_accessToken, _refreshToken, profile: Profile, done) => {
+    async (req, _accessToken, _refreshToken, profile: Profile, done) => {
       try {
         const email = profile.emails?.[0]?.value;
         if (!email) {
@@ -24,6 +25,21 @@ passport.use(
         const avatar = profile.photos?.[0]?.value;
         const googleId = profile.id;
         const name = profile.displayName || email.split('@')[0];
+
+        // Determine the role from the state query parameter
+        let role = UserRole.STUDENT;
+        if (req.query && req.query.state) {
+          try {
+            const parsedState = JSON.parse(req.query.state as string);
+            if (parsedState.role === 'mentor') {
+              role = UserRole.MENTOR;
+            }
+          } catch (e) {
+            if (req.query.state === 'mentor') {
+              role = UserRole.MENTOR;
+            }
+          }
+        }
 
         // ── Case 1: user already linked Google ────────────────
         const googleUser = await User.findOne({ googleId }).select('+refreshTokens');
@@ -55,16 +71,20 @@ passport.use(
           email,
           googleId,
           avatar,
-          role: UserRole.STUDENT, // default role; user can change later
+          role,
           authProvider: AuthProvider.GOOGLE,
           isEmailVerified: true, // Google verifies email for us
           status: UserStatus.ACTIVE,
         });
 
-        // Create student profile by default
-        await profileDAO.createStudentProfile(newUser._id);
+        // Create profile based on selected role
+        if (role === UserRole.MENTOR) {
+          await profileDAO.createMentorProfile(newUser._id);
+        } else {
+          await profileDAO.createStudentProfile(newUser._id);
+        }
 
-        logger.info(`New Google OAuth user registered: ${email}`);
+        logger.info(`New Google OAuth user registered as ${role}: ${email}`);
         return done(null, newUser);
       } catch (error) {
         logger.error('Google OAuth strategy error:', error);

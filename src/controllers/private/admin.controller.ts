@@ -171,6 +171,27 @@ export class AdminController {
     }
   }
 
+  async listMentors(req: Request, res: Response, next: NextFunction) {
+    try {
+      const page = Number(req.query.page ?? 1);
+      const limit = Math.min(Number(req.query.limit ?? 20), 100);
+      const skip = (page - 1) * limit;
+      const [mentors, total] = await Promise.all([
+        Mentor.find()
+          .populate('user', '-password -refreshTokens')
+          .skip(skip)
+          .limit(limit)
+          .sort({ createdAt: -1 })
+          .lean(),
+        Mentor.countDocuments(),
+      ]);
+      sendSuccess(res, { mentors, total }, undefined, 200);
+      return;
+    } catch (e) {
+      next(e);
+    }
+  }
+
   // ─── Bookings / Payments ──────────────────────────────────
   async listBookings(req: Request, res: Response, next: NextFunction) {
     try {

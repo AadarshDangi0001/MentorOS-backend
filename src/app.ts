@@ -28,6 +28,7 @@ app.use(
   cors({
     origin: (origin, callback) => {
       const allowed = ENV.CLIENT_URL.split(',').map((u) => u.trim());
+      console.log('CORS Request Origin:', origin, 'Allowed list:', allowed);
       if (!origin || allowed.includes(origin)) return callback(null, true);
       callback(new Error(`CORS: origin ${origin} not allowed`));
     },

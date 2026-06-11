@@ -11,7 +11,7 @@ router.use(authenticate);
 // Student
 router.get(
   '/my',
-  requireEmailVerified,
+   requireEmailVerified,
   authorize(UserRole.STUDENT),
   bookingController.getMyBookings.bind(bookingController)
 );
@@ -31,7 +31,7 @@ router.post(
 // Mentor
 router.get(
   '/mentor',
-  requireEmailVerified,
+   requireEmailVerified,
   authorize(UserRole.MENTOR),
   bookingController.getMentorBookings.bind(bookingController)
 );
@@ -40,6 +40,12 @@ router.post(
   requireEmailVerified,
   authorize(UserRole.MENTOR),
   bookingController.requestReschedule.bind(bookingController)
+);
+router.post(
+  '/:bookingId/cancel',
+  requireEmailVerified,
+  authorize(UserRole.MENTOR),
+  bookingController.cancelBooking.bind(bookingController)
 );
 
 // Shared (student or mentor of the booking)

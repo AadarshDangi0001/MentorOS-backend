@@ -3,6 +3,7 @@ import { googleAuthService } from '../../services/public/google-auth.service';
 import { IUser } from '../../types';
 import { ENV } from '../../config/env';
 import { ApiError } from '../../utils/ApiError';
+import logger from '../../utils/logger';
 
 const COOKIE_OPTIONS = {
   httpOnly: true,
@@ -16,7 +17,7 @@ export class GoogleAuthController {
     // passport.authenticate('google') handles this
   }
 
-  async googleCallback(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async googleCallback(req: Request, res: Response, _next: NextFunction): Promise<void> {
     try {
       if (!req.user) {
         throw ApiError.unauthorized('Google authentication failed');
@@ -38,17 +39,17 @@ export class GoogleAuthController {
         return;
       }
 
-      const redirectUrl = new URL(`${ENV.CLIENT_URL}/auth/google/success`);
+      const redirectUrl = new URL(`${ENV.FRONTEND_URL}/auth/google/success`);
       redirectUrl.searchParams.set('token', tokens.accessToken);
       res.redirect(redirectUrl.toString());
     } catch (error) {
-      res.redirect(`${ENV.CLIENT_URL}/auth/login?error=google_auth_failed`);
-      next(error);
+      logger.error('Google callback handling error:', error);
+      res.redirect(`${ENV.FRONTEND_URL}/?error=google_auth_failed`);
     }
   }
 
   googleFailure(_req: Request, res: Response): void {
-    res.redirect(`${ENV.CLIENT_URL}/auth/login?error=google_auth_failed`);
+    res.redirect(`${ENV.FRONTEND_URL}/?error=google_auth_failed`);
   }
 }
 

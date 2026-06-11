@@ -43,6 +43,17 @@ export class PrivateAuthController {
       next(error);
     }
   }
+
+  async updateMe(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const authReq = req as IAuthRequest;
+      const { name, phone, bio, avatar } = req.body;
+      const user = await authService.updateMe(authReq.user!._id.toString(), { name, phone, bio, avatar });
+      sendSuccess(res, { user }, 'Profile updated');
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export const authController = new PrivateAuthController();

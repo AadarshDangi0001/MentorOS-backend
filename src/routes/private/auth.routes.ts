@@ -9,6 +9,7 @@ const router = Router();
 router.use(authenticate);
 
 router.get('/me', authController.getMe.bind(authController));
+router.patch('/me', authController.updateMe.bind(authController));
 router.post('/logout', authController.logout.bind(authController));
 router.patch(
   '/change-password',

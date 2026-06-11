@@ -34,6 +34,7 @@ export class BookingDAO {
       .populate('mentor', 'name email avatar')
       .populate('package', 'title duration price')
       .populate('meeting', 'meetingLink status')
+      .populate('rescheduleNewAvailability', 'startTime endTime')
       .sort({ scheduledAt: -1 });
   }
 
@@ -47,6 +48,7 @@ export class BookingDAO {
       .populate('student', 'name email avatar')
       .populate('package', 'title duration price')
       .populate('meeting', 'meetingLink hostLink status')
+      .populate('rescheduleNewAvailability', 'startTime endTime')
       .sort({ scheduledAt: -1 });
   }
 

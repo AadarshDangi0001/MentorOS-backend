@@ -87,6 +87,26 @@ export class BookingService {
     return bookingDAO.acceptReschedule(bookingId, new Types.ObjectId(newAvailId), locked.startTime);
   }
 
+  /** Mentor cancels a booking */
+  async cancelBooking(bookingId: string, mentorId: string) {
+    const booking = await bookingDAO.findById(bookingId);
+    if (!booking) throw ApiError.notFound('Booking not found');
+
+    const bMentorId =
+      (booking.mentor as { _id: Types.ObjectId })._id?.toString() ?? booking.mentor.toString();
+    if (bMentorId !== mentorId) throw ApiError.forbidden('Not your booking');
+
+    if (!['confirmed', 'rescheduled'].includes(booking.status)) {
+      throw ApiError.badRequest('Only confirmed or rescheduled bookings can be cancelled');
+    }
+
+    // Free the associated availability slot
+    const availId = (booking.availability as Types.ObjectId).toString();
+    await availabilityDAO.markFree(availId);
+
+    return bookingDAO.updateStatus(bookingId, 'cancelled');
+  }
+
   /** Student rejects reschedule */
   async rejectReschedule(bookingId: string, studentId: string) {
     const booking = await bookingDAO.findById(bookingId);

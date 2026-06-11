@@ -1,4 +1,4 @@
-import { SortOrder } from 'mongoose';
+import { SortOrder, Types } from 'mongoose';
 import { Mentor } from '../../models/Mentor.model';
 import { MentorStatus } from '../../types';
 import { ApiError } from '../../utils/ApiError';
@@ -111,13 +111,23 @@ export class ExploreService {
   }
 
   async getMentorById(mentorUserId: string) {
-    const mentor = await Mentor.findOne({
+    let mentor = await Mentor.findOne({
       user: mentorUserId,
       mentorStatus: MentorStatus.APPROVED,
     })
       .populate('user', 'name email avatar bio phone')
       .select('-documents')
       .lean();
+
+    if (!mentor && Types.ObjectId.isValid(mentorUserId)) {
+      mentor = await Mentor.findOne({
+        _id: mentorUserId,
+        mentorStatus: MentorStatus.APPROVED,
+      })
+        .populate('user', 'name email avatar bio phone')
+        .select('-documents')
+        .lean();
+    }
 
     if (!mentor) {
       throw ApiError.notFound('Mentor not found');

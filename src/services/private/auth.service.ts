@@ -3,6 +3,7 @@ import { ApiError } from '../../utils/ApiError';
 import { getTokenTTL } from '../../utils/jwt';
 import { blacklistToken } from '../../config/redis';
 import { IUser } from '../../types';
+import { User } from '../../models/User.model';
 
 export class PrivateAuthService {
   // ─── Logout ────────────────────────────────────────────────
@@ -40,6 +41,26 @@ export class PrivateAuthService {
   async getMe(userId: string): Promise<IUser> {
     // [DAO] plain user fetch
     const user = await userDAO.findById(userId);
+    if (!user) throw ApiError.notFound('User not found');
+    return user;
+  }
+
+  // ─── Update Me ─────────────────────────────────────────────
+  async updateMe(
+    userId: string,
+    data: { name?: string; phone?: string; bio?: string; avatar?: string }
+  ): Promise<IUser> {
+    const allowedFields: Record<string, unknown> = {};
+    if (data.name !== undefined) allowedFields.name = data.name;
+    if (data.phone !== undefined) allowedFields.phone = data.phone;
+    if (data.bio !== undefined) allowedFields.bio = data.bio;
+    if (data.avatar !== undefined) allowedFields.avatar = data.avatar;
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { $set: allowedFields },
+      { new: true, runValidators: true }
+    );
     if (!user) throw ApiError.notFound('User not found');
     return user;
   }
