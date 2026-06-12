@@ -34,13 +34,14 @@ export class GoogleAuthController {
         res.status(200).json({
           success: true,
           message: 'Google login successful',
-          data: { user, accessToken: tokens.accessToken },
+          data: { user, accessToken: tokens.accessToken, refreshToken: tokens.refreshToken },
         });
         return;
       }
 
       const redirectUrl = new URL(`${ENV.FRONTEND_URL}/auth/google/success`);
       redirectUrl.searchParams.set('token', tokens.accessToken);
+      redirectUrl.searchParams.set('refreshToken', tokens.refreshToken);
       res.redirect(redirectUrl.toString());
     } catch (error) {
       logger.error('Google callback handling error:', error);

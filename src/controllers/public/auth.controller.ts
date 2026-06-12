@@ -19,7 +19,7 @@ export class PublicAuthController {
       res.cookie('refreshToken', tokens.refreshToken, COOKIE_OPTIONS);
       sendCreated(
         res,
-        { user, accessToken: tokens.accessToken },
+        { user, accessToken: tokens.accessToken, refreshToken: tokens.refreshToken },
         'Registration successful. Please verify your email.'
       );
     } catch (error) {
@@ -32,7 +32,11 @@ export class PublicAuthController {
       const { email, password } = req.body;
       const { user, tokens } = await authService.login(email, password);
       res.cookie('refreshToken', tokens.refreshToken, COOKIE_OPTIONS);
-      sendSuccess(res, { user, accessToken: tokens.accessToken }, 'Login successful');
+      sendSuccess(
+        res,
+        { user, accessToken: tokens.accessToken, refreshToken: tokens.refreshToken },
+        'Login successful'
+      );
     } catch (error) {
       next(error);
     }
@@ -47,7 +51,11 @@ export class PublicAuthController {
       }
       const tokens = await authService.refreshToken(token);
       res.cookie('refreshToken', tokens.refreshToken, COOKIE_OPTIONS);
-      sendSuccess(res, { accessToken: tokens.accessToken }, 'Token refreshed');
+      sendSuccess(
+        res,
+        { accessToken: tokens.accessToken, refreshToken: tokens.refreshToken },
+        'Token refreshed'
+      );
     } catch (error) {
       next(error);
     }
