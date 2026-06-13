@@ -8,6 +8,7 @@ const MeetingSchema = new Schema<IMeeting>(
     provider: { type: String, required: true, default: 'livekit' },
     meetingLink: { type: String, required: true },
     hostLink: { type: String },
+    passcode: { type: String },
     startTime: { type: Date, required: true },
     endTime: { type: Date, required: true },
     status: {

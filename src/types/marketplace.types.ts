@@ -80,6 +80,7 @@ export interface IMeeting extends Document {
   provider: string;
   meetingLink: string;
   hostLink?: string;
+  passcode?: string;
   startTime: Date;
   endTime: Date;
   status: MeetingStatus;

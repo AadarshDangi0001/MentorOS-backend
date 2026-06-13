@@ -101,7 +101,7 @@ export class PaymentService {
     razorpayOrderId: string,
     razorpayPaymentId: string,
     razorpaySignature: string,
-    meetingData: { roomId: string; provider: string; meetingLink: string; hostLink?: string }
+    meetingData?: { roomId: string; provider: string; meetingLink: string; hostLink?: string }
   ) {
     // Verify signature
     const body = `${razorpayOrderId}|${razorpayPaymentId}`;
@@ -128,27 +128,34 @@ export class PaymentService {
     const booking = await bookingDAO.findById(payment.booking.toString());
     if (!booking) throw ApiError.internal('Booking not found');
 
-    // Create meeting record (from your existing meet backend)
-    const meeting = await meetingDAO.create({
-      booking: payment.booking,
-      roomId: meetingData.roomId,
-      provider: meetingData.provider,
-      meetingLink: meetingData.meetingLink,
-      hostLink: meetingData.hostLink,
-      startTime: booking.scheduledAt,
-      endTime: new Date(new Date(booking.scheduledAt).getTime() + booking.duration * 60 * 1000),
-    });
-
-    // Confirm booking + attach meeting
+    // Confirm booking
     await bookingDAO.updateStatus(payment.booking.toString(), 'confirmed');
-    await bookingDAO.setMeeting(payment.booking.toString(), meeting._id);
 
-    logger.info(`Booking confirmed: ${payment.booking}, meeting: ${meeting._id}`);
+    let meetingLink = '';
+
+    // Create meeting record if meetingData is provided (backwards compatibility)
+    if (meetingData && meetingData.roomId) {
+      const meeting = await meetingDAO.create({
+        booking: payment.booking,
+        roomId: meetingData.roomId,
+        provider: meetingData.provider,
+        meetingLink: meetingData.meetingLink,
+        hostLink: meetingData.hostLink,
+        startTime: booking.scheduledAt,
+        endTime: new Date(new Date(booking.scheduledAt).getTime() + booking.duration * 60 * 1000),
+      });
+
+      await bookingDAO.setMeeting(payment.booking.toString(), meeting._id);
+      meetingLink = meeting.meetingLink;
+      logger.info(`Booking confirmed: ${payment.booking}, meeting: ${meeting._id}`);
+    } else {
+      logger.info(`Booking confirmed: ${payment.booking}, meeting will be created on demand by mentor`);
+    }
 
     return {
       alreadyConfirmed: false,
       bookingId: payment.booking,
-      meetingLink: meeting.meetingLink,
+      meetingLink,
     };
   }
 
