@@ -50,8 +50,12 @@ export class AdminController {
       ).select('-password -refreshTokens');
       if (!user) throw ApiError.notFound('User not found');
 
-      // Invalidate user session cache
-      await deleteUserSession(targetId);
+      // Invalidate user session cache and explore cache
+      await Promise.all([
+        deleteUserSession(targetId),
+        deleteKeysByPattern('explore:mentors:list:*'),
+        deleteCache(`explore:mentor:detail:${targetId}`),
+      ]);
 
       sendSuccess(res, { user }, 'User blocked');
     } catch (e) {
@@ -75,8 +79,12 @@ export class AdminController {
       ).select('-password -refreshTokens');
       if (!user) throw ApiError.notFound('User not found');
 
-      // Invalidate user session cache
-      await deleteUserSession(req.params.id);
+      // Invalidate user session cache and explore cache
+      await Promise.all([
+        deleteUserSession(req.params.id),
+        deleteKeysByPattern('explore:mentors:list:*'),
+        deleteCache(`explore:mentor:detail:${req.params.id}`),
+      ]);
 
       sendSuccess(res, { user }, 'User unblocked');
     } catch (e) {
@@ -101,8 +109,12 @@ export class AdminController {
       ).select('-password -refreshTokens');
       if (!user) throw ApiError.notFound('User not found');
 
-      // Invalidate user session cache
-      await deleteUserSession(targetId);
+      // Invalidate user session cache and explore cache
+      await Promise.all([
+        deleteUserSession(targetId),
+        deleteKeysByPattern('explore:mentors:list:*'),
+        deleteCache(`explore:mentor:detail:${targetId}`),
+      ]);
 
       sendSuccess(res, null, 'User marked as deleted');
     } catch (e) {
@@ -136,7 +148,7 @@ export class AdminController {
         throw ApiError.forbidden('Only super admins can modify user roles');
       }
 
-      const updateData: Record<string, any> = { role };
+      const updateData: { role: UserRole; status?: UserStatus } = { role };
       if (role === UserRole.BLOCKED) {
         updateData.status = UserStatus.SUSPENDED;
       } else if (role === UserRole.DELETED) {
@@ -152,8 +164,12 @@ export class AdminController {
       ).select('-password -refreshTokens');
       if (!user) throw ApiError.notFound('User not found');
 
-      // Invalidate user session cache
-      await deleteUserSession(targetId);
+      // Invalidate user session cache and explore cache
+      await Promise.all([
+        deleteUserSession(targetId),
+        deleteKeysByPattern('explore:mentors:list:*'),
+        deleteCache(`explore:mentor:detail:${targetId}`),
+      ]);
 
       sendSuccess(res, { user }, 'User role updated successfully');
     } catch (e) {

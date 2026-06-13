@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, Request } from 'express';
 import multer from 'multer';
 import { mediaController } from '../../controllers/private/media.controller';
 import { ApiError } from '../../utils/ApiError';
@@ -10,12 +10,12 @@ const router = Router();
 const storage = multer.memoryStorage();
 
 // File filter restricting to images (jpg, jpeg, png, webp)
-const fileFilter = (_req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+const fileFilter = (_req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
   const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
   if (allowedMimeTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error('Invalid file type. Only JPEG, PNG, and WEBP images are allowed.') as any, false);
+    cb(new Error('Invalid file type. Only JPEG, PNG, and WEBP images are allowed.'));
   }
 };
 

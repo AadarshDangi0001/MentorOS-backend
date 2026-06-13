@@ -11,6 +11,15 @@ export enum UserRole {
   SUPER_ADMIN = 'super_admin',
 }
 
+export const RoleHierarchy = {
+  [UserRole.BLOCKED]: -2,
+  [UserRole.DELETED]: -1,
+  [UserRole.STUDENT]: 1,
+  [UserRole.MENTOR]: 2,
+  [UserRole.ADMIN]: 3,
+  [UserRole.SUPER_ADMIN]: 4
+} as const;
+
 export enum UserStatus {
   ACTIVE = 'active',
   INACTIVE = 'inactive',

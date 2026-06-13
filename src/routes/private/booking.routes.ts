@@ -11,7 +11,7 @@ router.use(authenticate);
 // Student
 router.get(
   '/my',
-   requireEmailVerified,
+  requireEmailVerified,
   authorize(UserRole.STUDENT),
   bookingController.getMyBookings.bind(bookingController)
 );
@@ -31,7 +31,7 @@ router.post(
 // Mentor
 router.get(
   '/mentor',
-   requireEmailVerified,
+  requireEmailVerified,
   authorize(UserRole.MENTOR),
   bookingController.getMentorBookings.bind(bookingController)
 );

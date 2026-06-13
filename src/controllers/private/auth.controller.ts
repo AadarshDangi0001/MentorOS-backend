@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { authService } from '../../services/private/auth.service';
 import { sendSuccess } from '../../utils/ApiResponse';
 import { IAuthRequest } from '../../types';
+import { deleteCache, deleteKeysByPattern } from '../../config/redis';
 
 export class PrivateAuthController {
   async logout(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -49,6 +50,16 @@ export class PrivateAuthController {
       const authReq = req as IAuthRequest;
       const { name, phone, bio, avatar } = req.body;
       const user = await authService.updateMe(authReq.user!._id.toString(), { name, phone, bio, avatar });
+
+      // Invalidate explore cache if user is a mentor
+      if (user.role === 'mentor') {
+        const userId = user._id.toString();
+        await Promise.all([
+          deleteKeysByPattern('explore:mentors:list:*'),
+          deleteCache(`explore:mentor:detail:${userId}`),
+        ]);
+      }
+
       sendSuccess(res, { user }, 'Profile updated');
     } catch (error) {
       next(error);

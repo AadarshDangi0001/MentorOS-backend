@@ -4,6 +4,8 @@ import { getTokenTTL } from '../../utils/jwt';
 import { blacklistToken, deleteUserSession } from '../../config/redis';
 import { IUser } from '../../types';
 import { User } from '../../models/User.model';
+import { deleteFromImageKit } from '../../utils/imagekit';
+import logger from '../../utils/logger';
 
 export class PrivateAuthService {
   // ─── Logout ────────────────────────────────────────────────
@@ -56,6 +58,15 @@ export class PrivateAuthService {
     if (data.bio !== undefined) allowedFields.bio = data.bio;
     if (data.avatar !== undefined) allowedFields.avatar = data.avatar;
 
+    // Fetch existing user to check the old avatar
+    let oldAvatar: string | undefined;
+    if (data.avatar !== undefined) {
+      const existingUser = await User.findById(userId).select('avatar');
+      if (existingUser && existingUser.avatar) {
+        oldAvatar = existingUser.avatar;
+      }
+    }
+
     const user = await User.findByIdAndUpdate(
       userId,
       { $set: allowedFields },
@@ -65,6 +76,13 @@ export class PrivateAuthService {
 
     // Invalidate cached user session in Redis so subsequent requests get updated data
     await deleteUserSession(userId);
+
+    // Delete old avatar from ImageKit if the avatar was updated/removed
+    if (data.avatar !== undefined && oldAvatar && oldAvatar !== data.avatar) {
+      deleteFromImageKit(oldAvatar).catch((err) => {
+        logger.error('Failed to delete old avatar in background:', err);
+      });
+    }
 
     return user;
   }

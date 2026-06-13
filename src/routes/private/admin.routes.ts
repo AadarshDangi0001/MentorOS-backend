@@ -1,13 +1,13 @@
 import { Router } from 'express';
 import { adminController } from '../../controllers/private/admin.controller';
 import { authenticate } from '../../middleware/auth/authenticate';
-import { authorize } from '../../middleware/auth/authorize';
+import { authorizeAtLeast } from '../../middleware/auth/authorize';
 import { UserRole } from '../../types';
 
 const router = Router();
 
-// Allow both ADMIN and SUPER_ADMIN for general admin functionalities
-router.use(authenticate, authorize(UserRole.ADMIN, UserRole.SUPER_ADMIN));
+// Allow both ADMIN and SUPER_ADMIN for general admin functionalities via hierarchy
+router.use(authenticate, authorizeAtLeast(UserRole.ADMIN));
 
 router.get('/stats', adminController.getStats.bind(adminController));
 router.get('/users', adminController.listUsers.bind(adminController));

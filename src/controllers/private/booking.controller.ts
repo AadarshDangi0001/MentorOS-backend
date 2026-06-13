@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { bookingService } from '../../services/private/booking.service';
 import { sendSuccess } from '../../utils/ApiResponse';
 import { IAuthRequest } from '../../types';
+import { BookingStatus } from '../../types/marketplace.types';
 
 export class BookingController {
   async getById(req: Request, res: Response, next: NextFunction) {
@@ -20,7 +21,7 @@ export class BookingController {
       const { status } = req.query;
       const bookings = await bookingService.getStudentBookings(
         userId,
-        status as string | undefined as any
+        status as BookingStatus | undefined
       );
       sendSuccess(res, { bookings });
     } catch (e) {
@@ -34,7 +35,7 @@ export class BookingController {
       const { status } = req.query;
       const bookings = await bookingService.getMentorBookings(
         userId,
-        status as string | undefined as any
+        status as BookingStatus | undefined
       );
       sendSuccess(res, { bookings });
     } catch (e) {

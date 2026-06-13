@@ -40,3 +40,55 @@ export const uploadToImageKit = async (
     throw error;
   }
 };
+
+/**
+ * Deletes a file from ImageKit given its URL.
+ */
+export const deleteFromImageKit = async (url: string): Promise<void> => {
+  if (!imagekit) {
+    logger.warn('ImageKit is not configured. Skipping deletion.');
+    return;
+  }
+
+  if (!url) {
+    return;
+  }
+
+  // Check if the URL belongs to our ImageKit endpoint
+  const urlEndpoint = ENV.IMAGEKIT_URL_ENDPOINT;
+  if (!urlEndpoint || !url.startsWith(urlEndpoint)) {
+    logger.debug(`URL ${url} is not an ImageKit URL or endpoint is not configured. Skipping deletion.`);
+    return;
+  }
+
+  try {
+    const cleanUrl = url.split('?')[0];
+    const fileName = cleanUrl.split('/').pop();
+    if (!fileName) {
+      logger.warn(`Could not extract filename from URL: ${url}`);
+      return;
+    }
+
+    logger.info(`Searching for file in ImageKit: ${fileName}`);
+    // Search for the file to get the fileId
+    const response = await imagekit.assets.list({
+      searchQuery: `name = "${fileName}"`,
+    });
+
+    if (response && response.length > 0) {
+      const file = response[0];
+      if ('fileId' in file && file.fileId) {
+        logger.info(`Deleting file from ImageKit: ${fileName} (${file.fileId})`);
+        await imagekit.files.delete(file.fileId);
+        logger.info(`Successfully deleted file from ImageKit: ${fileName}`);
+      } else {
+        logger.warn(`Found file but it had no fileId: ${fileName}`);
+      }
+    } else {
+      logger.warn(`No file found in ImageKit with name: ${fileName}`);
+    }
+  } catch (error) {
+    logger.error('Failed to delete file from ImageKit:', error);
+  }
+};
+
