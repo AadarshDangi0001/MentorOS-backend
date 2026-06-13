@@ -14,3 +14,31 @@ export const changePasswordValidator = [
       return true;
     }),
 ];
+
+export const updateMeValidator = [
+  body('name')
+    .optional()
+    .trim()
+    .isLength({ min: 2, max: 50 })
+    .withMessage('Name must be 2-50 characters'),
+
+  body('phone')
+    .optional()
+    .isString()
+    .trim()
+    .isLength({ max: 20 })
+    .withMessage('Phone number must be a valid string'),
+
+  body('bio')
+    .optional()
+    .isString()
+    .trim()
+    .isLength({ max: 500 })
+    .withMessage('Bio must be up to 500 characters'),
+
+  body('avatar')
+    .optional()
+    .isString()
+    .trim(),
+];
+

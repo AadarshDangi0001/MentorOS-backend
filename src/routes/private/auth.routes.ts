@@ -2,14 +2,19 @@ import { Router } from 'express';
 import { authController } from '../../controllers/private/auth.controller';
 import { authenticate } from '../../middleware/auth/authenticate';
 import { validate } from '../../middleware/validate';
-import { changePasswordValidator } from '../../validators/private/auth.validator';
+import { changePasswordValidator, updateMeValidator } from '../../validators/private/auth.validator';
 
 const router = Router();
 
 router.use(authenticate);
 
 router.get('/me', authController.getMe.bind(authController));
-router.patch('/me', authController.updateMe.bind(authController));
+router.patch(
+  '/me',
+  updateMeValidator,
+  validate,
+  authController.updateMe.bind(authController)
+);
 router.post('/logout', authController.logout.bind(authController));
 router.patch(
   '/change-password',
