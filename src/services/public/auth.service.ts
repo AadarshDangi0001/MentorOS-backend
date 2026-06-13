@@ -84,7 +84,12 @@ export class PublicAuthService {
 
   // ─── Refresh Token ─────────────────────────────────────────
   async refreshToken(token: string): Promise<IAuthTokens> {
-    const decoded = verifyRefreshToken(token);
+    let decoded;
+    try {
+      decoded = verifyRefreshToken(token);
+    } catch (error) {
+      throw ApiError.unauthorized('Invalid or expired refresh token');
+    }
 
     // [DAO] verify token exists in DB
     const user = await userDAO.findByIdWithRefreshTokens(decoded.id);
