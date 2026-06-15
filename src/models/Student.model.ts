@@ -17,7 +17,6 @@ const StudentSchema = new Schema<IStudent>(
   { timestamps: true }
 );
 
-StudentSchema.index({ user: 1 });
 StudentSchema.index({ skills: 1 });
 
 export const Student = mongoose.model<IStudent>('Student', StudentSchema);

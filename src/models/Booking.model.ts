@@ -27,6 +27,7 @@ const BookingSchema = new Schema<IBooking>(
     rescheduleRequestedBy: { type: Schema.Types.ObjectId, ref: 'User' },
     rescheduleReason: { type: String, trim: true, maxlength: 300 },
     rescheduleNewAvailability: { type: Schema.Types.ObjectId, ref: 'Availability' },
+    cancelledBy: { type: Schema.Types.ObjectId, ref: 'User' },
   },
   { timestamps: true }
 );

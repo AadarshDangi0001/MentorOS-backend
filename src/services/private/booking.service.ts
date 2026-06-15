@@ -82,29 +82,39 @@ export class BookingService {
     if (!locked) throw ApiError.conflict('New slot is no longer available');
 
     // Free original slot
-    await availabilityDAO.markFree((booking.availability as Types.ObjectId).toString());
+    const oldAvailId =
+      (booking.availability as { _id?: Types.ObjectId })._id?.toString() ??
+      booking.availability.toString();
+    await availabilityDAO.markFree(oldAvailId);
 
     return bookingDAO.acceptReschedule(bookingId, new Types.ObjectId(newAvailId), locked.startTime);
   }
 
-  /** Mentor cancels a booking */
-  async cancelBooking(bookingId: string, mentorId: string) {
+  /** Cancel a booking (can be called by student or mentor) */
+  async cancelBooking(bookingId: string, userId: string) {
     const booking = await bookingDAO.findById(bookingId);
     if (!booking) throw ApiError.notFound('Booking not found');
 
-    const bMentorId =
+    const studentId =
+      (booking.student as { _id: Types.ObjectId })._id?.toString() ?? booking.student.toString();
+    const mentorId =
       (booking.mentor as { _id: Types.ObjectId })._id?.toString() ?? booking.mentor.toString();
-    if (bMentorId !== mentorId) throw ApiError.forbidden('Not your booking');
+
+    if (userId !== studentId && userId !== mentorId) {
+      throw ApiError.forbidden('Not authorized to cancel this booking');
+    }
 
     if (!['confirmed', 'rescheduled'].includes(booking.status)) {
       throw ApiError.badRequest('Only confirmed or rescheduled bookings can be cancelled');
     }
 
     // Free the associated availability slot
-    const availId = (booking.availability as Types.ObjectId).toString();
+    const availId =
+      (booking.availability as { _id?: Types.ObjectId })._id?.toString() ??
+      booking.availability.toString();
     await availabilityDAO.markFree(availId);
 
-    return bookingDAO.updateStatus(bookingId, 'cancelled');
+    return bookingDAO.cancelBooking(bookingId, new Types.ObjectId(userId));
   }
 
   /** Student rejects reschedule */

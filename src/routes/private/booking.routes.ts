@@ -57,21 +57,19 @@ router.post(
   validate,
   bookingController.requestReschedule.bind(bookingController)
 );
-router.post(
-  '/:bookingId/cancel',
-  requireEmailVerified,
-  authorize(UserRole.MENTOR),
-  mongoIdParamValidator('bookingId'),
-  validate,
-  bookingController.cancelBooking.bind(bookingController)
-);
-
 // Shared (student or mentor of the booking)
 router.get(
   '/:id',
   mongoIdParamValidator('id'),
   validate,
   bookingController.getById.bind(bookingController)
+);
+router.post(
+  '/:bookingId/cancel',
+  requireEmailVerified,
+  mongoIdParamValidator('bookingId'),
+  validate,
+  bookingController.cancelBooking.bind(bookingController)
 );
 
 export default router;

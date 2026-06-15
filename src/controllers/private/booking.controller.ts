@@ -81,8 +81,8 @@ export class BookingController {
 
   async cancelBooking(req: Request, res: Response, next: NextFunction) {
     try {
-      const mentorId = (req as IAuthRequest).user!._id.toString();
-      const booking = await bookingService.cancelBooking(req.params.bookingId, mentorId);
+      const userId = (req as IAuthRequest).user!._id.toString();
+      const booking = await bookingService.cancelBooking(req.params.bookingId, userId);
       sendSuccess(res, { booking }, 'Booking cancelled');
     } catch (e) {
       next(e);

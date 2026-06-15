@@ -8,7 +8,7 @@ const PaymentSchema = new Schema<IPayment>(
     amount: { type: Number, required: true }, // paise
     currency: { type: String, default: 'INR' },
     gateway: { type: String, enum: ['razorpay'], default: 'razorpay' },
-    gatewayOrderId: { type: String, required: true, unique: true, index: true },
+    gatewayOrderId: { type: String, required: true, unique: true },
     gatewayPaymentId: { type: String, index: true },
     gatewaySignature: { type: String },
     status: {

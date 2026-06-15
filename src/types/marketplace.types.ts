@@ -47,6 +47,7 @@ export interface IBooking extends Document {
   rescheduleRequestedBy?: Types.ObjectId;
   rescheduleReason?: string;
   rescheduleNewAvailability?: Types.ObjectId;
+  cancelledBy?: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }

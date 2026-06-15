@@ -164,7 +164,14 @@ export class UserDAO {
   async rotateRefreshToken(userId: string, oldToken: string, newToken: string): Promise<void> {
     await User.findByIdAndUpdate(userId, {
       $pull: { refreshTokens: oldToken },
-      $push: { refreshTokens: newToken },
+    });
+    await User.findByIdAndUpdate(userId, {
+      $push: {
+        refreshTokens: {
+          $each: [newToken],
+          $slice: -5, // keep only last 5 sessions
+        },
+      },
     });
     await deleteUserSession(userId);
   }

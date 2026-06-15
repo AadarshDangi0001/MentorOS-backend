@@ -20,7 +20,8 @@ export class BookingDAO {
       .populate('mentor', 'name email avatar')
       .populate('package', 'title duration price')
       .populate('availability', 'startTime endTime')
-      .populate('meeting', 'meetingLink hostLink status');
+      .populate('meeting', 'meetingLink hostLink status')
+      .populate('cancelledBy', 'name email role');
     // no .lean()
   }
 
@@ -35,6 +36,7 @@ export class BookingDAO {
       .populate('package', 'title duration price')
       .populate('meeting', 'meetingLink status')
       .populate('rescheduleNewAvailability', 'startTime endTime')
+      .populate('cancelledBy', 'name email role')
       .sort({ scheduledAt: -1 });
   }
 
@@ -49,11 +51,20 @@ export class BookingDAO {
       .populate('package', 'title duration price')
       .populate('meeting', 'meetingLink hostLink status')
       .populate('rescheduleNewAvailability', 'startTime endTime')
+      .populate('cancelledBy', 'name email role')
       .sort({ scheduledAt: -1 });
   }
 
   async updateStatus(id: string, status: BookingStatus): Promise<IBooking | null> {
     return Booking.findByIdAndUpdate(id, { $set: { status } }, { new: true });
+  }
+
+  async cancelBooking(id: string, cancelledById: Types.ObjectId): Promise<IBooking | null> {
+    return Booking.findByIdAndUpdate(
+      id,
+      { $set: { status: 'cancelled', cancelledBy: cancelledById } },
+      { new: true }
+    );
   }
 
   async setPayment(bookingId: string, paymentId: Types.ObjectId): Promise<void> {

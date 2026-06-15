@@ -65,9 +65,7 @@ export class PublicAuthService {
 
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
-      await (
-        user as unknown as { incrementLoginAttempts(): Promise<void> }
-      ).incrementLoginAttempts();
+      await user.incrementLoginAttempts();
       throw ApiError.unauthorized('Invalid credentials');
     }
 

@@ -65,6 +65,7 @@ export interface IUser extends Document {
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
   isLocked(): boolean;
+  incrementLoginAttempts(): Promise<void>;
 }
 
 // ─── Student ──────────────────────────────────────────────────

@@ -41,7 +41,6 @@ const MentorSchema = new Schema<IMentor>(
   { timestamps: true }
 );
 
-MentorSchema.index({ user: 1 });
 MentorSchema.index({ mentorStatus: 1 });
 MentorSchema.index({ expertise: 1 });
 MentorSchema.index({ rating: -1 });

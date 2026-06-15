@@ -20,6 +20,4 @@ const MeetingSchema = new Schema<IMeeting>(
   { timestamps: true }
 );
 
-MeetingSchema.index({ booking: 1 });
-
 export const Meeting = mongoose.model<IMeeting>('Meeting', MeetingSchema);
