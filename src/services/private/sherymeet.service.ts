@@ -55,6 +55,7 @@ export class SheryMeetService {
       bodyHash = crypto.createHash('sha256').update(canonicalBody, 'utf8').digest('hex');
     }
 
+    const origin = " ";
     // 2. Build Payload
     const payload = [
       method.toUpperCase(),
@@ -64,7 +65,7 @@ export class SheryMeetService {
       timestamp,
       nonce,
       bodyHash,
-      '', // Empty origin for server-to-server calls
+      origin,
     ].join('\n');
 
     // 3. Sign Payload
