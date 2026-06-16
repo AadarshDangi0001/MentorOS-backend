@@ -9,6 +9,8 @@ export interface SheryMeetUser {
   email: string;
 }
 
+
+
 export class SheryMeetService {
   private get credentials() {
     return {
@@ -55,7 +57,7 @@ export class SheryMeetService {
       bodyHash = crypto.createHash('sha256').update(canonicalBody, 'utf8').digest('hex');
     }
 
-    const origin = " ";
+    const origin = "";
     // 2. Build Payload
     const payload = [
       method.toUpperCase(),
@@ -111,10 +113,15 @@ export class SheryMeetService {
   }
 
   async createMeeting(host: SheryMeetUser, passcode: string): Promise<any> {
-    return this.request('POST', '/api/v1/client/meet', { host, passcode });
+    try{
+      return this.request('POST', '/api/v1/client/meet', { host, passcode });
+    }catch(err){
+      console.log(err);
+    }
   }
 
   async joinAsHost(roomId: string, user: SheryMeetUser, passcode: string): Promise<any> {
+    console.log(user, "Sherymeet user")
     return this.request('POST', '/api/v1/client/meet/join-as-host', { roomId, user, passcode });
   }
 
@@ -122,8 +129,8 @@ export class SheryMeetService {
     return this.request('POST', '/api/v1/client/meet/join-as-user', { roomId, user });
   }
 
-  async endMeeting(roomId: string): Promise<any> {
-    return this.request('POST', '/api/v1/client/meet/end-meet', { roomId });
+  async endMeeting(roomId: string,user: SheryMeetUser): Promise<any> {
+    return this.request('POST', '/api/v1/client/meet/end-meet', { roomId, user });
   }
 }
 

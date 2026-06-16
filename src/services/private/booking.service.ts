@@ -3,6 +3,7 @@ import { bookingDAO } from '../../dao/booking.dao';
 import { availabilityDAO } from '../../dao/availability.dao';
 import { ApiError } from '../../utils/ApiError';
 import { BookingStatus } from '../../types/marketplace.types';
+import { Review } from '../../models/Review.model';
 
 export class BookingService {
   async getById(bookingId: string, requesterId: string) {
@@ -17,11 +18,28 @@ export class BookingService {
     if (studentId !== requesterId && mentorId !== requesterId) {
       throw ApiError.forbidden('Access denied');
     }
-    return booking;
+    
+    const isReviewed = await Review.exists({ booking: booking._id });
+    return {
+      ...booking.toObject(),
+      isReviewed: !!isReviewed,
+    };
   }
 
   async getStudentBookings(studentId: string, status?: BookingStatus | BookingStatus[]) {
-    return bookingDAO.findByStudent(studentId, status);
+    const bookings = await bookingDAO.findByStudent(studentId, status);
+    
+    // Find all reviews by this student to determine which bookings are reviewed
+    const reviews = await Review.find({ student: new Types.ObjectId(studentId) }, 'booking');
+    const reviewedBookingIds = new Set(reviews.map(r => r.booking.toString()));
+
+    return bookings.map(b => {
+      const bObj = b.toObject();
+      return {
+        ...bObj,
+        isReviewed: reviewedBookingIds.has(bObj._id.toString())
+      };
+    });
   }
 
   async getMentorBookings(mentorId: string, status?: BookingStatus | BookingStatus[]) {

@@ -4,12 +4,14 @@ import connectDB from './config/database';
 import { connectRedis } from './config/redis';
 import logger from './utils/logger';
 
+
 const startServer = async (): Promise<void> => {
   try {
     // Connect to databases
     await connectDB();
     await connectRedis();
 
+  
     const server = app.listen(ENV.PORT, () => {
       logger.info(`Server running in ${ENV.NODE_ENV} mode on port ${ENV.PORT}`);
     });

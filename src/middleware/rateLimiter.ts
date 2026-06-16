@@ -21,9 +21,14 @@ function createLazyLimiter(options: {
 
   return (req: Request, res: Response, next: NextFunction) => {
     // Bypass rate limiting for testing
-   if (ENV.NODE_ENV === 'test') {
-  return next();
-}
+    if (ENV.NODE_ENV === 'test') {
+      return next();
+    }
+
+    // Bypass rate limiting for review routes
+    if (req.originalUrl.includes('/reviews')) {
+      return next();
+    }
 
     if (!limiter) {
       limiter = rateLimit({

@@ -44,12 +44,22 @@ export class AvailabilityDAO {
     endTime: Date,
     excludeId?: string
   ): Promise<boolean> {
+    const now = new Date();
     const query: Record<string, unknown> = {
       mentor: mentorId,
+      // Ignore expired unbooked slots: slot must be either booked or starting in the future/present
       $or: [
-        { startTime: { $lt: endTime, $gte: startTime } },
-        { endTime: { $gt: startTime, $lte: endTime } },
-        { startTime: { $lte: startTime }, endTime: { $gte: endTime } },
+        { isBooked: true },
+        { startTime: { $gte: now } },
+      ],
+      $and: [
+        {
+          $or: [
+            { startTime: { $lt: endTime, $gte: startTime } },
+            { endTime: { $gt: startTime, $lte: endTime } },
+            { startTime: { $lte: startTime }, endTime: { $gte: endTime } },
+          ],
+        },
       ],
     };
     if (excludeId) query._id = { $ne: excludeId };

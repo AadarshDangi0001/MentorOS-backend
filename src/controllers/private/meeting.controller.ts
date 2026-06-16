@@ -3,6 +3,7 @@ import { meetingDAO } from '../../dao/meeting.dao';
 import { bookingDAO } from '../../dao/booking.dao';
 import { Meeting } from '../../models/Meeting.model';
 import { sheryMeetService } from '../../services/private/sherymeet.service';
+import { ENV } from '../../config/env';
 import { sendSuccess } from '../../utils/ApiResponse';
 import { ApiError } from '../../utils/ApiError';
 import { IAuthRequest } from '../../types';
@@ -75,7 +76,7 @@ export class MeetingController {
         role: 'mentor',
         email: hostUser.email,
       };
-
+      console.log("Entering the shery meet create service")
       const response = await sheryMeetService.createMeeting(hostData, passcode);
       if (!response || !response.success || !response.data) {
         throw ApiError.internal('Failed to create meeting room on SheryMeet');
@@ -140,6 +141,21 @@ export class MeetingController {
         throw ApiError.internal('Failed to join meeting as host');
       }
 
+      if (response.data.meetLink) {
+        try {
+          const urlObj = new URL(response.data.meetLink);
+          const sheryBase = new URL(ENV.SHERYMEET_BASE_URL);
+          urlObj.protocol = sheryBase.protocol;
+          urlObj.host = sheryBase.host;
+          response.data.meetLink = urlObj.toString();
+        } catch (e) {
+          response.data.meetLink = response.data.meetLink.replace(
+            /https?:\/\/[^\/]+/,
+            ENV.SHERYMEET_BASE_URL
+          );
+        }
+      }
+
       // Update meeting status to started if it's scheduled
       if (meeting.status === 'scheduled') {
         meeting.status = 'started';
@@ -187,6 +203,21 @@ export class MeetingController {
         throw ApiError.internal('Failed to join meeting as student');
       }
 
+      if (response.data.meetLink) {
+        try {
+          const urlObj = new URL(response.data.meetLink);
+          const sheryBase = new URL(ENV.SHERYMEET_BASE_URL);
+          urlObj.protocol = sheryBase.protocol;
+          urlObj.host = sheryBase.host;
+          response.data.meetLink = urlObj.toString();
+        } catch (e) {
+          response.data.meetLink = response.data.meetLink.replace(
+            /https?:\/\/[^\/]+/,
+            ENV.SHERYMEET_BASE_URL
+          );
+        }
+      }
+
       sendSuccess(res, response.data, 'Student joined successfully');
     } catch (e) {
       next(e);
@@ -210,7 +241,15 @@ export class MeetingController {
       if (!meeting) throw ApiError.notFound('Meeting not found');
 
       // Call SheryMeet API
-      const response = await sheryMeetService.endMeeting(meeting.roomId);
+      const mentorUser = (req as IAuthRequest).user!;
+      const mentorData = {
+        _id: mentorUser._id.toString(),
+        userName: mentorUser.name,
+        role: 'mentor',
+        email: mentorUser.email,
+      };
+
+      const response = await sheryMeetService.endMeeting(meeting.roomId, mentorData);
       if (!response || !response.success) {
         throw ApiError.internal('Failed to end meeting on SheryMeet');
       }
