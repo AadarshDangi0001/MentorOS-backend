@@ -226,6 +226,39 @@ export class PaymentService {
     logger.info(`Cancelled pending booking ${bookingId} and freed slot ${availId}`);
     return { success: true };
   }
+
+  async refundPayment(bookingId: string) {
+    const payment = await Payment.findOne({ booking: new Types.ObjectId(bookingId) });
+    if (!payment) {
+      logger.warn(`No payment record found for booking ${bookingId} to refund`);
+      return;
+    }
+
+    if (payment.status !== 'paid') {
+      logger.warn(`Payment status for booking ${bookingId} is ${payment.status}, skipping refund`);
+      return;
+    }
+
+    if (!payment.gatewayPaymentId) {
+      logger.warn(`No gatewayPaymentId for payment ${payment._id}, skipping refund`);
+      return;
+    }
+
+    try {
+      const rp = getRazorpay();
+      logger.info(`Initiating Razorpay refund for payment: ${payment.gatewayPaymentId}, booking: ${bookingId}`);
+      
+      const refund = await rp.payments.refund(payment.gatewayPaymentId, {
+        amount: payment.amount,
+      });
+
+      await Payment.findByIdAndUpdate(payment._id, { $set: { status: 'refunded' } });
+      logger.info(`Refund successful for booking ${bookingId}, refundId: ${refund.id}`);
+    } catch (err: any) {
+      // Log the error but do not throw, so booking cancellation itself can still succeed
+      logger.error(`Failed to process refund for booking ${bookingId}: ${err.message || err}`, err);
+    }
+  }
 }
 
 export const paymentService = new PaymentService();

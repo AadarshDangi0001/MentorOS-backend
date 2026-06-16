@@ -4,6 +4,7 @@ import { availabilityDAO } from '../../dao/availability.dao';
 import { ApiError } from '../../utils/ApiError';
 import { BookingStatus } from '../../types/marketplace.types';
 import { Review } from '../../models/Review.model';
+import { paymentService } from './payment.service';
 
 export class BookingService {
   async getById(bookingId: string, requesterId: string) {
@@ -131,6 +132,9 @@ export class BookingService {
       (booking.availability as { _id?: Types.ObjectId })._id?.toString() ??
       booking.availability.toString();
     await availabilityDAO.markFree(availId);
+
+    // Process payment refund
+    await paymentService.refundPayment(bookingId);
 
     return bookingDAO.cancelBooking(bookingId, new Types.ObjectId(userId));
   }
