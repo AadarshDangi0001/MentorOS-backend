@@ -57,6 +57,17 @@ export class PaymentController {
       next(e);
     }
   }
+
+  async cancel(req: Request, res: Response, next: NextFunction) {
+    try {
+      const studentId = (req as IAuthRequest).user!._id.toString();
+      const { bookingId } = req.body;
+      const result = await paymentService.cancelPendingBooking(studentId, bookingId);
+      sendSuccess(res, result, 'Pending booking removed successfully');
+    } catch (e) {
+      next(e);
+    }
+  }
 }
 
 export const paymentController = new PaymentController();

@@ -22,5 +22,9 @@ router.post(
   validate,
   paymentController.verify.bind(paymentController)
 );
+router.post(
+  '/cancel',
+  paymentController.cancel.bind(paymentController)
+);
 
 export default router;

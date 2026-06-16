@@ -10,6 +10,8 @@ import { ApiError } from '../../utils/ApiError';
 import { ENV } from '../../config/env';
 import logger from '../../utils/logger';
 import { acquireLock, releaseLock } from '../../config/redis';
+import { Booking } from '../../models/Booking.model';
+import { Payment } from '../../models/Payment.model';
 
 let razorpay: Razorpay;
 
@@ -197,6 +199,32 @@ export class PaymentService {
         }
       }
     }
+  }
+
+  async cancelPendingBooking(studentId: string, bookingId: string) {
+    const booking = await bookingDAO.findById(bookingId);
+    if (!booking) throw ApiError.notFound('Booking not found');
+
+    const bStudentId =
+      (booking.student as { _id: Types.ObjectId })._id?.toString() ?? booking.student.toString();
+    if (bStudentId !== studentId) throw ApiError.forbidden('Not authorized to cancel this booking');
+
+    if (booking.status !== 'pending') {
+      throw ApiError.badRequest('Only pending bookings can be removed');
+    }
+
+    // Free the availability slot
+    const availId =
+      (booking.availability as { _id?: Types.ObjectId })._id?.toString() ??
+      booking.availability.toString();
+    await availabilityDAO.markFree(availId);
+
+    // Delete payment and booking records
+    await Payment.deleteOne({ booking: booking._id });
+    await Booking.deleteOne({ _id: booking._id });
+
+    logger.info(`Cancelled pending booking ${bookingId} and freed slot ${availId}`);
+    return { success: true };
   }
 }
 
