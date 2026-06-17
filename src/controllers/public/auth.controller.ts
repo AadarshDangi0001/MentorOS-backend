@@ -61,12 +61,13 @@ export class PublicAuthController {
     }
   }
 
-  async verifyEmail(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async verifyEmail(req: Request, res: Response): Promise<void> {
     try {
-      const user = await authService.verifyEmail(req.params.token);
-      sendSuccess(res, { user }, 'Email verified successfully');
-    } catch (error) {
-      next(error);
+      await authService.verifyEmail(req.params.token);
+      res.redirect(`${ENV.FRONTEND_URL}/?verified=true`);
+    } catch (error: any) {
+      const errorMessage = encodeURIComponent(error.message || 'Email verification failed');
+      res.redirect(`${ENV.FRONTEND_URL}/?error=${errorMessage}`);
     }
   }
 
