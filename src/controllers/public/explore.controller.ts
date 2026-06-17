@@ -24,7 +24,7 @@ export class ExploreController {
         maxExperience: maxExperience ? Number(maxExperience) : undefined,
         minRating: minRating ? Number(minRating) : undefined,
         page: page ? Number(page) : 1,
-        limit: limit ? Math.min(Number(limit), 50) : 12,
+        limit: limit ? Math.min(Number(limit), 1000) : 1000,
         sort: sort as 'rating' | 'experience' | 'price',
         order: order as 'asc' | 'desc',
       });

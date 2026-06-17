@@ -1,6 +1,7 @@
 import { SortOrder, Types } from 'mongoose';
 import { Mentor } from '../../models/Mentor.model';
-import { MentorStatus } from '../../types';
+import { User } from '../../models/User.model';
+import { MentorStatus, UserRole, UserStatus } from '../../types';
 import { ApiError } from '../../utils/ApiError';
 
 export interface MentorFilter {
@@ -30,8 +31,16 @@ export class ExploreService {
       order = 'desc',
     } = filters;
 
+    // Find active, verified users with role = mentor to filter explore results
+    const activeUsers = await User.find({
+      role: UserRole.MENTOR,
+      status: UserStatus.ACTIVE,
+    }).select('_id');
+    const activeUserIds = activeUsers.map((u) => u._id);
+
     const query: Record<string, unknown> = {
       mentorStatus: MentorStatus.APPROVED,
+      user: { $in: activeUserIds },
     };
 
     if (company) {
@@ -85,7 +94,7 @@ export class ExploreService {
 
     const [mentors, total] = await Promise.all([
       Mentor.find(query)
-        .populate('user', 'name email avatar bio')
+        .populate('user', 'name email avatar bio status role')
         .select('-documents')
         .sort(
           sortMap[sort] ?? {
@@ -115,7 +124,7 @@ export class ExploreService {
       user: mentorUserId,
       mentorStatus: MentorStatus.APPROVED,
     })
-      .populate('user', 'name email avatar bio phone')
+      .populate('user', 'name email avatar bio phone status role')
       .select('-documents')
       .lean();
 
@@ -124,12 +133,12 @@ export class ExploreService {
         _id: mentorUserId,
         mentorStatus: MentorStatus.APPROVED,
       })
-        .populate('user', 'name email avatar bio phone')
+        .populate('user', 'name email avatar bio phone status role')
         .select('-documents')
         .lean();
     }
 
-    if (!mentor) {
+    if (!mentor || !mentor.user || (mentor.user as any).status !== UserStatus.ACTIVE || (mentor.user as any).role !== UserRole.MENTOR) {
       throw ApiError.notFound('Mentor not found');
     }
 

@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { User } from '../../models/User.model';
 import { Mentor } from '../../models/Mentor.model';
+import { Student } from '../../models/Student.model';
 import { Booking } from '../../models/Booking.model';
 import { Payment } from '../../models/Payment.model';
 import { bookingDAO } from '../../dao/booking.dao';
@@ -102,12 +103,14 @@ export class AdminController {
         throw ApiError.forbidden('You cannot delete yourself');
       }
 
-      const user = await User.findByIdAndUpdate(
-        targetId,
-        { $set: { role: UserRole.DELETED, status: UserStatus.INACTIVE } },
-        { new: true }
-      ).select('-password -refreshTokens');
+      const user = await User.findByIdAndDelete(targetId);
       if (!user) throw ApiError.notFound('User not found');
+
+      // Delete associated profiles
+      await Promise.all([
+        Mentor.findOneAndDelete({ user: targetId }),
+        Student.findOneAndDelete({ user: targetId }),
+      ]);
 
       // Invalidate user session cache and explore cache
       await Promise.all([
@@ -116,7 +119,7 @@ export class AdminController {
         deleteCache(`explore:mentor:detail:${targetId}`),
       ]);
 
-      sendSuccess(res, null, 'User marked as deleted');
+      sendSuccess(res, null, 'User deleted successfully');
     } catch (e) {
       next(e);
     }
