@@ -147,12 +147,22 @@ export class MeetingController {
           const sheryBase = new URL(ENV.SHERYMEET_BASE_URL);
           urlObj.protocol = sheryBase.protocol;
           urlObj.host = sheryBase.host;
+          if (urlObj.protocol === 'https:' && urlObj.port === '3000') {
+            urlObj.port = '';
+          }
           response.data.meetLink = urlObj.toString();
         } catch (e) {
           response.data.meetLink = response.data.meetLink.replace(
             /https?:\/\/[^\/]+/,
             ENV.SHERYMEET_BASE_URL
           );
+        }
+
+        // Clean up any leaked internal ports (like :3000 or /:3000) for public HTTPS URLs
+        if (response.data.meetLink.startsWith('https://')) {
+          response.data.meetLink = response.data.meetLink
+            .replace('/:3000', '')
+            .replace(':3000', '');
         }
       }
 
@@ -209,12 +219,22 @@ export class MeetingController {
           const sheryBase = new URL(ENV.SHERYMEET_BASE_URL);
           urlObj.protocol = sheryBase.protocol;
           urlObj.host = sheryBase.host;
+          if (urlObj.protocol === 'https:' && urlObj.port === '3000') {
+            urlObj.port = '';
+          }
           response.data.meetLink = urlObj.toString();
         } catch (e) {
           response.data.meetLink = response.data.meetLink.replace(
             /https?:\/\/[^\/]+/,
             ENV.SHERYMEET_BASE_URL
           );
+        }
+
+        // Clean up any leaked internal ports (like :3000 or /:3000) for public HTTPS URLs
+        if (response.data.meetLink.startsWith('https://')) {
+          response.data.meetLink = response.data.meetLink
+            .replace('/:3000', '')
+            .replace(':3000', '');
         }
       }
 
