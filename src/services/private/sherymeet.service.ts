@@ -57,7 +57,7 @@ export class SheryMeetService {
       bodyHash = crypto.createHash('sha256').update(canonicalBody, 'utf8').digest('hex');
     }
 
-    const origin = "";
+    const origin = "https://mentoros-test.duckdns.org";
     // 2. Build Payload
     const payload = [
       method.toUpperCase(),
