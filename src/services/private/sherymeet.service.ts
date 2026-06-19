@@ -57,7 +57,7 @@ export class SheryMeetService {
       bodyHash = crypto.createHash('sha256').update(canonicalBody, 'utf8').digest('hex');
     }
 
-    const origin = "https://mentoros-test.duckdns.org";
+    const origin = ENV.ORIGIN;
     // 2. Build Payload
     const payload = [
       method.toUpperCase(),
@@ -69,6 +69,7 @@ export class SheryMeetService {
       bodyHash,
       origin,
     ].join('\n');
+    
 
     // 3. Sign Payload
     const signature = crypto
@@ -84,6 +85,7 @@ export class SheryMeetService {
       'x-nonce': nonce,
       'x-signature-version': 'v1',
       'x-signature': signature,
+      'Origin': origin,
     };
   }
 
@@ -122,7 +124,7 @@ export class SheryMeetService {
 
   async joinAsHost(roomId: string, user: SheryMeetUser, passcode: string): Promise<any> {
     console.log(user, "Sherymeet user")
-    return this.request('POST', '/api/v1/client/meet/join-as-host', { roomId, user, passcode });
+    return this.request('POST', '/api/v1/client/meet/join-as-host', { roomId, host:user, passcode });
   }
 
   async joinAsUser(roomId: string, user: SheryMeetUser): Promise<any> {

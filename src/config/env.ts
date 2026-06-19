@@ -53,6 +53,8 @@ export const ENV = {
   IMAGEKIT_PRIVATE_KEY: process.env.IMAGEKIT_PRIVATE_KEY || '',
   IMAGEKIT_URL_ENDPOINT: process.env.IMAGEKIT_URL_ENDPOINT || '',
 
+  ORIGIN:process.env.ORIGIN || 'http://localhost:3000',
+
   // SheryMeet
   SHERYMEET_API_KEY: process.env.SHERYMEET_API_KEY || 'sm_live_your_actual_api_key_here',
   SHERYMEET_CLIENT_SECRET: process.env.SHERYMEET_CLIENT_SECRET || 'sm_sec_your_actual_plaintext_secret_here',
