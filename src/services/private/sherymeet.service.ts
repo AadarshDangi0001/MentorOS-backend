@@ -124,7 +124,7 @@ export class SheryMeetService {
 
   async joinAsHost(roomId: string, user: SheryMeetUser, passcode: string): Promise<any> {
     console.log(user, "Sherymeet user")
-    return this.request('POST', '/api/v1/client/meet/join-as-host', { roomId, host:user, passcode });
+    return this.request('POST', '/api/v1/client/meet/join-as-host', { roomId, user, passcode });
   }
 
   async joinAsUser(roomId: string, user: SheryMeetUser): Promise<any> {
